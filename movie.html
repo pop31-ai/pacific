@@ -68,6 +68,15 @@ body{background:#0d0d1a;color:#fff;font-family:'Segoe UI',sans-serif;overflow-x:
 .dir-panel label{font-size:.8em;color:#888;margin-right:10px}
 .dir-panel input[type=range]{width:100px;accent-color:#e94560}
 .dir-panel select{background:#222;color:#fff;border:1px solid #444;border-radius:4px;padding:3px 6px;font-size:.8em}
+.cam-select{display:none;background:rgba(255,255,255,.05);border-radius:10px;padding:10px 14px;margin:8px 0;border:1px solid #333}
+.cam-select.on{display:block}
+.cam-title{color:#ffd700;font-weight:700;margin-bottom:8px;font-size:.9em}
+.cam-options{display:flex;gap:8px;flex-wrap:wrap}
+.cam-btn{padding:8px 16px;font-size:.85em;border:2px solid #667eea;background:rgba(102,126,234,.1);color:#667eea;border-radius:8px;cursor:pointer;transition:all .2s;flex:1;min-width:120px;text-align:center}
+.cam-btn:hover{background:rgba(102,126,234,.2);transform:scale(1.03)}
+.cam-btn.active{background:#667eea;color:#fff;border-color:#667eea}
+.cam-btn .cam-icon{font-size:1.4em;display:block;margin-bottom:4px}
+.cam-btn .cam-name{font-weight:600;display:block}
 </style>
 </head>
 <body>
@@ -103,6 +112,11 @@ body{background:#0d0d1a;color:#fff;font-family:'Segoe UI',sans-serif;overflow-x:
     <label>Свет: <input type="range" id="light" min="30" max="120" value="80" oninput="dirUpdate()"></label>
     <label>Настроение: <select id="mood" onchange="dirUpdate()"><option value="cheerful">Весёлое</option><option value="dramatic">Драма</option><option value="calm">Спокойное</option><option value="romantic">Романтика</option></select></label>
     <label>Скорость анимации: <input type="range" id="animSpd" min="2" max="20" value="10" oninput="dirUpdate()"></label>
+</div>
+
+<div class="cam-select" id="camPanel">
+    <div class="cam-title">Выберите камеру:</div>
+    <div class="cam-options" id="camOptions"></div>
 </div>
 
 <div class="epi" id="ep0"><h2>ПРОЛОГ</h2><p>Знакомство с Шефом Вишенкой</p></div>
@@ -219,6 +233,91 @@ function dirUpdate(){D.camX=+document.getElementById('camX').value;D.camY=+docum
 function toggleDir(){var p=document.getElementById('dirPanel');p.classList.toggle('on')}
 
 function clamp(v,a,b){return Math.max(a,Math.min(b,v))}
+
+/* ===== CAMERA SYSTEM ===== */
+var CAMS={
+    1:[
+        {id:'std',icon:'🎥',name:'Стандарт',desc:'Общий план кухни',camX:0,camY:0,zoom:1},
+        {id:'close',icon:'🔍',name:'Крупный план',desc:'Детали на столе',camX:0,camY:-15,zoom:1.4},
+        {id:'wide',icon:'📐',name:'Широкий план',desc:'Вся кухня целиком',camX:0,camY:0,zoom:0.7}
+    ],
+    2:[
+        {id:'std',icon:'🎥',name:'Стандарт',desc:'Миска с дрожжами',camX:0,camY:0,zoom:1},
+        {id:'macro',icon:'🔬',name:'Макро',desc:'Гранулы и пузырьки',camX:0,camY:-20,zoom:1.8},
+        {id:'top',icon:'⬇️',name:'Вид сверху',desc:'Миска изнутри',camX:0,camY:-10,zoom:1.2}
+    ],
+    3:[
+        {id:'std',icon:'🎥',name:'Стандарт',desc:'Замес теста',camX:0,camY:0,zoom:1},
+        {id:'hands',icon:'🤲',name:'Руки шефа',desc:'Процесс замеса',camX:0,camY:-10,zoom:1.3},
+        {id:'dough',icon:'🫓',name:'Тесто',desc:'Текстура и структура',camX:0,camY:-5,zoom:1.5}
+    ],
+    4:[
+        {id:'std',icon:'🎥',name:'Стандарт',desc:'Тесто растёт',camX:0,camY:0,zoom:1},
+        {id:'time',icon:'⏰',name:'Таймлапс',desc:'Время в ускорении',camX:0,camY:0,zoom:0.8},
+        {id:'chef',icon:'👨‍🍳',name:'Шеф ждёт',desc:'За книгой',camX:-30,camY:0,zoom:1.1}
+    ],
+    5:[
+        {id:'std',icon:'🎥',name:'Стандарт',desc:'Приготовление',camX:0,camY:0,zoom:1},
+        {id:'sizzle',icon:'🔥',name:'Сковорода',desc:'Обжарка вблизи',camX:20,camY:-15,zoom:1.4},
+        {id:'chop',icon:'🔪',name:'Нарезка',desc:'Нож и лук',camX:-30,camY:-10,zoom:1.3}
+    ],
+    6:[
+        {id:'std',icon:'🎥',name:'Стандарт',desc:'Формировка',camX:0,camY:0,zoom:1},
+        {id:'pleat',icon:'🫓',name:'Защипы',desc:'Шов вблизи',camX:10,camY:-10,zoom:1.6},
+        {id:'tray',icon:'📋',name:'Противень',desc:'12 штук',camX:30,camY:0,zoom:0.9}
+    ],
+    7:[
+        {id:'std',icon:'🎥',name:'Стандарт',desc:'Выпечка',camX:0,camY:0,zoom:1},
+        {id:'oven',icon:'🔥',name:'В духовке',desc:'Пирожки внутри',camX:0,camY:-10,zoom:1.5},
+        {id:'timer',icon:'⏰',name:'Таймер',desc:'Ожидание',camX:0,camY:0,zoom:0.8}
+    ],
+    8:[
+        {id:'std',icon:'🎥',name:'Стандарт',desc:'Дегустация',camX:0,camY:0,zoom:1},
+        {id:'cut',icon:'🔪',name:'Разрез',desc:'Крупный план',camX:10,camY:-15,zoom:1.8},
+        {id:'face',icon:'😋',name:'Реакция',desc:'Улыбка шефа',camX:-20,camY:-5,zoom:1.2}
+    ]
+};
+var camState={};
+function initCam(){for(var i=1;i<=8;i++)camState[i]=0}
+initCam();
+
+function showCamPanel(sceneNum){
+    var panel=document.getElementById('camPanel');
+    var opts=document.getElementById('camOptions');
+    opts.innerHTML='';
+    var cams=CAMS[sceneNum];
+    if(!cams)return;
+    cams.forEach(function(c,i){
+        var btn=document.createElement('div');
+        btn.className='cam-btn'+(camState[sceneNum]===i?' active':'');
+        btn.innerHTML='<span class="cam-icon">'+c.icon+'</span><span class="cam-name">'+c.name+'</span><span style="font-size:.75em;color:#aaa">'+c.desc+'</span>';
+        btn.onclick=function(){
+            camState[sceneNum]=i;
+            camState.currentScene=sceneNum;
+            showCamPanel(sceneNum);
+            applyCam(sceneNum);
+        };
+        opts.appendChild(btn);
+    });
+    panel.classList.add('on');
+}
+
+function applyCam(sceneNum){
+    var cam=CAMS[sceneNum][camState[sceneNum]];
+    if(!cam)return;
+    document.getElementById('camX').value=cam.camX;
+    document.getElementById('camY').value=cam.camY;
+    D.camX=cam.camX;
+    D.camY=cam.camY;
+    D.zoom=cam.zoom;
+}
+
+function getSceneNum(){
+    for(var i=0;i<SCENES.length;i++){
+        if(T>=SCENES[i].t0&&T<SCENES[i].t1)return i+1;
+    }
+    return 0;
+}
 
 /* ===== PARTICLE SYSTEM ===== */
 function Particles(){this.p=[]}
@@ -867,6 +966,12 @@ function tick(){
     document.getElementById('pf').style.width=(T/TOTAL*100)+'%';
 
     var animT=D.animSpd/10;
+    var currentScene=getSceneNum();
+
+    if(camState.currentScene!==currentScene&&currentScene>0){
+        camState.currentScene=currentScene;
+        showCamPanel(currentScene);
+    }
 
     SCENES.forEach(function(sc){
         var el=document.getElementById(sc.id);
@@ -879,7 +984,15 @@ function tick(){
             if(info&&SC[sc.id.split('s')[1]]){
                 info.x.clearRect(0,0,info.c.width,info.c.height);
                 var localT=(T-sc.t0)/(sc.t1-sc.t0);
+                var sceneNum=parseInt(sc.id.split('s')[1]);
+                var cam=CAMS[sceneNum]&&CAMS[sceneNum][camState[sceneNum]];
+                var zoom=cam?cam.zoom:1;
+                info.x.save();
+                info.x.translate(info.c.width/2,info.c.height/2);
+                info.x.scale(zoom,zoom);
+                info.x.translate(-info.c.width/2,-info.c.height/2);
                 SC[sc.id.split('s')[1]](info.x,info.c.width,info.c.height,localT*12*animT);
+                info.x.restore();
             }
         }else{
             if(T>=sc.t1&&T<sc.t1+3){
