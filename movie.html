@@ -63,6 +63,20 @@ body{background:#0d0d1a;color:#fff;font-family:'Segoe UI',sans-serif;overflow-x:
 #intro .bigbtn{padding:16px 50px;font-size:1.3em;border:none;border-radius:14px;cursor:pointer;background:linear-gradient(135deg,#4CAF50,#2e7d32);color:#fff;font-weight:700;transition:all .3s;box-shadow:0 4px 20px rgba(76,175,80,.3)}
 #intro .bigbtn:hover{transform:scale(1.08);box-shadow:0 6px 30px rgba(76,175,80,.5)}
 #intro .hint{margin-top:16px;color:#555;font-size:.8em}
+#intro .view-modes{display:flex;gap:12px;margin:20px 0;justify-content:center;flex-wrap:wrap}
+.vm-card{background:rgba(255,255,255,.06);border:2px solid #333;border-radius:12px;padding:16px 20px;cursor:pointer;transition:all .3s;text-align:center;min-width:140px}
+.vm-card:hover{border-color:#667eea;transform:translateY(-3px)}
+.vm-card.active{border-color:#ffd700;background:rgba(255,215,0,.08)}
+.vm-card .vm-icon{font-size:2em;display:block;margin-bottom:4px}
+.vm-card .vm-name{font-weight:700;font-size:.9em;color:#fff;display:block}
+.vm-card .vm-desc{font-size:.7em;color:#888;margin-top:2px;display:block}
+.ctrls{opacity:1;transition:opacity .4s}
+.ctrls.hide{opacity:0;pointer-events:none}
+.cam-select{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);z-index:50;display:none;background:rgba(13,13,26,.92);border-radius:12px;padding:8px 12px;border:1px solid rgba(102,126,234,.4);backdrop-filter:blur(8px);transition:opacity .3s}
+.cam-select.on{display:flex}
+.cam-select .cam-title{display:none}
+.cam-select .cam-options{gap:6px}
+.cam-select .cam-btn{padding:6px 12px;font-size:.8em;min-width:100px}
 .dir-panel{display:none;background:rgba(255,255,255,.05);border-radius:10px;padding:10px 14px;margin:8px 0;border:1px solid #333}
 .dir-panel.on{display:block}
 .dir-panel label{font-size:.8em;color:#888;margin-right:10px}
@@ -77,6 +91,35 @@ body{background:#0d0d1a;color:#fff;font-family:'Segoe UI',sans-serif;overflow-x:
 .cam-btn.active{background:#667eea;color:#fff;border-color:#667eea}
 .cam-btn .cam-icon{font-size:1.4em;display:block;margin-bottom:4px}
 .cam-btn .cam-name{font-weight:600;display:block}
+.mini-tl{display:flex;gap:2px;margin:12px 0;height:28px;align-items:stretch}
+.mini-sc{flex:1;border-radius:4px;position:relative;overflow:hidden;cursor:pointer;transition:all .2s;opacity:.4}
+.mini-sc:hover{opacity:.8;transform:scaleY(1.15)}
+.mini-sc.active{opacity:1;box-shadow:0 0 8px rgba(233,69,96,.5)}
+.mini-sc .mlabel{position:absolute;bottom:2px;left:2px;right:2px;font-size:.55em;text-align:center;color:#fff;text-shadow:0 1px 3px #000;white-space:nowrap;overflow:hidden}
+.mini-sc .mfill{position:absolute;bottom:0;left:0;height:3px;background:#e94560;transition:width .3s}
+.replay{margin-top:20px;display:none}
+.replay.on{display:block;animation:fadeIn .5s}
+.replay h2{color:#ffd700;font-size:1.2em;margin-bottom:12px;text-align:center}
+.replay-grid{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.replay-card{background:rgba(255,255,255,.06);border:2px solid #333;border-radius:14px;padding:20px 24px;cursor:pointer;transition:all .3s;text-align:center;min-width:180px;flex:1;max-width:260px}
+.replay-card:hover{border-color:#667eea;transform:translateY(-4px);box-shadow:0 8px 24px rgba(102,126,234,.2)}
+.replay-card .rc-icon{font-size:2.4em;display:block;margin-bottom:8px}
+.replay-card .rc-name{font-weight:700;font-size:1em;color:#fff;display:block}
+.replay-card .rc-desc{font-size:.8em;color:#888;margin-top:4px;display:block}
+.scene-picker{position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:200;display:none;align-items:center;justify-content:center;flex-direction:column;animation:fadeIn .3s}
+.scene-picker.on{display:flex}
+.sp-title{font-size:1.6em;color:#ffd700;font-weight:700;margin-bottom:6px}
+.sp-sub{color:#888;font-size:.95em;margin-bottom:20px}
+.sp-cards{display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
+.sp-card{background:rgba(255,255,255,.06);border:2px solid #444;border-radius:14px;padding:20px 28px;cursor:pointer;transition:all .3s;text-align:center;min-width:160px}
+.sp-card:hover{border-color:#667eea;transform:translateY(-4px);box-shadow:0 8px 24px rgba(102,126,234,.3)}
+.sp-card.active{border-color:#ffd700;background:rgba(255,215,0,.1);box-shadow:0 0 20px rgba(255,215,0,.15)}
+.sp-card .spc-icon{font-size:2.2em;display:block;margin-bottom:6px}
+.sp-card .spc-name{font-weight:700;font-size:1em;color:#fff;display:block}
+.sp-card .spc-desc{font-size:.75em;color:#888;margin-top:3px;display:block}
+.sp-timer{text-align:center;margin-top:18px;color:#555;font-size:.85em}
+.sp-timer .sp-bar{width:200px;height:4px;background:#333;border-radius:2px;margin:6px auto 0;overflow:hidden}
+.sp-timer .sp-bar-fill{height:100%;background:#ffd700;width:100%;transition:width 3s linear}
 </style>
 </head>
 <body>
@@ -85,11 +128,40 @@ body{background:#0d0d1a;color:#fff;font-family:'Segoe UI',sans-serif;overflow-x:
     <canvas id="introC" width="240" height="240"></canvas>
     <h1>Пирожки с нуля</h1>
     <p>Кино-мультик | Тесто Времени | 15 минут</p>
-    <div id="introClock" style="font-family:'Courier New';font-size:1.8em;color:#0f0;margin-bottom:20px">00:00</div>
+    <div id="introClock" style="font-family:'Courier New';font-size:1.8em;color:#0f0;margin-bottom:12px">00:00</div>
+    <div class="view-modes" id="viewModes">
+        <div class="vm-card active" data-mode="auto" onclick="selectView('auto')">
+            <span class="vm-icon">🎬</span>
+            <span class="vm-name">Автоматически</span>
+            <span class="vm-desc">Камеры меняются сами</span>
+        </div>
+        <div class="vm-card" data-mode="closeup" onclick="selectView('closeup')">
+            <span class="vm-icon">🔍</span>
+            <span class="vm-name">Подробно</span>
+            <span class="vm-desc">Крупные планы процесса</span>
+        </div>
+        <div class="vm-card" data-mode="wide" onclick="selectView('wide')">
+            <span class="vm-icon">📐</span>
+            <span class="vm-name">Обзорно</span>
+            <span class="vm-desc">Вся кухня целиком</span>
+        </div>
+        <div class="vm-card" data-mode="drama" onclick="selectView('drama')">
+            <span class="vm-icon">🎭</span>
+            <span class="vm-name">Драма</span>
+            <span class="vm-desc">Кино и контрастный свет</span>
+        </div>
+    </div>
     <button class="bigbtn" id="startBtn">▶ СМОТРЕТЬ</button>
     <div class="hint">Пробел — пауза &nbsp;|&nbsp; ← → — перемотка &nbsp;|&nbsp; D — режиссёр</div>
 </div>
 <div class="lov" id="lov"><div style="text-align:center"><div class="big">😂</div><div class="ltxt">ХА-ХА-ХА!</div></div></div>
+
+<div class="scene-picker" id="scenePicker">
+    <div class="sp-title" id="spTitle">СЦЕНА 1</div>
+    <div class="sp-sub" id="spSub">Выберите ракурс</div>
+    <div class="sp-cards" id="spCards"></div>
+    <div class="sp-timer">Начало через...<div class="sp-bar"><div class="sp-bar-fill" id="spBarFill"></div></div></div>
+</div>
 
 <div class="wrap">
 <div class="hdr">
@@ -114,10 +186,9 @@ body{background:#0d0d1a;color:#fff;font-family:'Segoe UI',sans-serif;overflow-x:
     <label>Скорость анимации: <input type="range" id="animSpd" min="2" max="20" value="10" oninput="dirUpdate()"></label>
 </div>
 
-<div class="cam-select" id="camPanel">
-    <div class="cam-title">Выберите камеру:</div>
-    <div class="cam-options" id="camOptions"></div>
-</div>
+
+
+<div class="mini-tl" id="miniTl"></div>
 
 <div class="epi" id="ep0"><h2>ПРОЛОГ</h2><p>Знакомство с Шефом Вишенкой</p></div>
 
@@ -224,6 +295,26 @@ body{background:#0d0d1a;color:#fff;font-family:'Segoe UI',sans-serif;overflow-x:
 <div class="rcard"><h3>Тайминг</h3><ul>
 <li>00:00 — 01:30 Пролог</li><li>01:30 — 04:00 Дрожжи</li><li>04:00 — 07:00 Тесто</li><li>07:00 — 09:00 Настаивание</li><li>09:00 — 11:00 Начинка</li><li>11:00 — 13:00 Лепка</li><li>13:00 — 14:30 Выпечка</li><li>14:30 — 15:00 Дегустация</li>
 </ul></div>
+<div class="replay" id="replayPanel">
+    <h2>Смотреть ещё раз с другими камерами</h2>
+    <div class="replay-grid">
+        <div class="replay-card" onclick="replayWith('closeup')">
+            <span class="rc-icon">🔍</span>
+            <span class="rc-name">Подробный</span>
+            <span class="rc-desc">Крупные планы: тесто, начинка, защипы — всё вблизи</span>
+        </div>
+        <div class="replay-card" onclick="replayWith('wide')">
+            <span class="rc-icon">📐</span>
+            <span class="rc-name">Обзорный</span>
+            <span class="rc-desc">Широкие планы: вся кухня целиком, процесс целиком</span>
+        </div>
+        <div class="replay-card" onclick="replayWith('drama')">
+            <span class="rc-icon">🎭</span>
+            <span class="rc-name">Драма</span>
+            <span class="rc-desc">Кинематографичные углы, контрастный свет, крупные планы лиц</span>
+        </div>
+    </div>
+</div>
 </div>
 </div>
 
@@ -233,6 +324,90 @@ function dirUpdate(){D.camX=+document.getElementById('camX').value;D.camY=+docum
 function toggleDir(){var p=document.getElementById('dirPanel');p.classList.toggle('on')}
 
 function clamp(v,a,b){return Math.max(a,Math.min(b,v))}
+
+/* ===== SUBTITLES ===== */
+var SUBS=[
+    {t0:15,t1:35,speaker:'Шеф',text:'Привет, друзья! Я — Шеф Вишенка!',color:'#e94560'},
+    {t0:35,t1:50,speaker:'Шеф',text:'Сначала — дрожжи! Без них ничего не взлетит!',color:'#e94560'},
+    {t0:50,t1:70,speaker:'Шеф',text:'Пятнадцать минут — и пирожки готовы!',color:'#e94560'},
+    {t0:70,t1:90,speaker:'Шеф',text:'Первый шаг — тёплая вода. Не горячая, не холодная.',color:'#e94560'},
+    {t0:90,t1:110,speaker:'Диктор',text:'Тридцать семь-сорок градусов. Идеальная температура.',color:'#667eea'},
+    {t0:110,t1:130,speaker:'Шеф',text:'Смотрите — одни тонут, другие плавают!',color:'#e94560'},
+    {t0:130,t1:145,speaker:'Шеф',text:'Сахар — первая еда. Дрожжи его обожают!',color:'#e94560'},
+    {t0:145,t1:190,speaker:'Диктор',text:'Дрожжи — одноклеточные грибы. Съедают сахар и выделяют CO₂.',color:'#667eea'},
+    {t0:190,t1:220,speaker:'Шеф',text:'Посмотрите! Живая пена! Дрожжи проснулись!',color:'#e94560'},
+    {t0:220,t1:240,speaker:'Шеф',text:'Каждый пузырёк — будущий пористый хлеб.',color:'#e94560'},
+    {t0:240,t1:260,speaker:'Шеф',text:'Мука — фундамент. Просеиваем обязательно!',color:'#e94560'},
+    {t0:260,t1:290,speaker:'Шеф',text:'Масло — эластичность. Соль — вкус. Сахар — золотистость.',color:'#e94560'},
+    {t0:290,t1:340,speaker:'Шеф',text:'Месим от края к центру. Складываем. Поворачиваем.',color:'#e94560'},
+    {t0:340,t1:380,speaker:'Шеф',text:'Тесто тянется, но не рвётся. Gluten сформирован.',color:'#e94560'},
+    {t0:380,t1:420,speaker:'Шеф',text:'Один час покоя. Не трогать!',color:'#e94560'},
+    {t0:450,t1:480,speaker:'Шеф',text:'Интересный факт: в Египте буханку нашли в гробнице фараона.',color:'#e94560'},
+    {t0:480,t1:505,speaker:'Шеф',text:'Великолепно! Газ внутри, структура — как у облака.',color:'#e94560'},
+    {t0:505,t1:525,speaker:'Шеф',text:'Обминаем — перераспределяем дрожжи и газ.',color:'#e94560'},
+    {t0:525,t1:540,speaker:'Шеф',text:'Каждый кусочек — 60 граммов. Точно!',color:'#e94560'},
+    {t0:540,t1:565,speaker:'Шеф',text:'Лук — сердце начинки. Да, заставляет плакать, но без него — пусто.',color:'#e94560'},
+    {t0:565,t1:590,speaker:'Шеф',text:'Мелардовая реакция — сахар + аминокислоты. Запах — мелардин.',color:'#e94560'},
+    {t0:590,t1:620,speaker:'Шеф',text:'Не трогаем! Пусть корочка схватится.',color:'#e94560'},
+    {t0:620,t1:640,speaker:'Шеф',text:'Тмин — тайный ингредиент. Запомни!',color:'#e94560'},
+    {t0:640,t1:660,speaker:'Шеф',text:'Горячая начинка = мокрое тесто = слёзы.',color:'#e94560'},
+    {t0:660,t1:680,speaker:'Шеф',text:'Катаем от центра. Толщина — 4 миллиметра.',color:'#e94560'},
+    {t0:680,t1:700,speaker:'Шеф',text:'Столовая ложка. Ровно в центр.',color:'#e94560'},
+    {t0:700,t1:730,speaker:'Шеф',text:'Пять защипов. Каждый — на 72 градуса.',color:'#e94560'},
+    {t0:730,t1:760,speaker:'Шеф',text:'Каждый лучше предыдущего!',color:'#e94560'},
+    {t0:760,t1:780,speaker:'Шеф',text:'Двенадцать шедевров!',color:'#e94560'},
+    {t0:780,t1:800,speaker:'Шеф',text:'Яйцо — это лак. Золотистость и блеск.',color:'#e94560'},
+    {t0:800,t1:820,speaker:'Шеф',text:'Инфракрасное излучение. Тепло проникает в тесто.',color:'#e94560'},
+    {t0:840,t1:860,speaker:'Шеф',text:'Карамелизация! Запах — мелард + карамель!',color:'#e94560'},
+    {t0:860,t1:870,speaker:'Шеф',text:'Пружинят — значит готово!',color:'#e94560'},
+    {t0:870,t1:882,speaker:'Шеф',text:'Хруст корочки — карамелизированный сахар!',color:'#e94560'},
+    {t0:882,t1:888,speaker:'Диктор',text:'Поры — результат CO₂. Каждая — воздушный карман.',color:'#667eea'},
+    {t0:888,t1:894,speaker:'Шеф',text:'Сочная начинка, хруст, мягкость. Это — баланс.',color:'#e94560'},
+    {t0:894,t1:900,speaker:'Шеф',text:'Приятного аппетита! Покупное тесто — в мусорку!',color:'#e94560'}
+];
+function drawSubtitles(ctx,W,H,t){
+    var sec=Math.floor(t/12*D.animSpd*1);
+    for(var i=0;i<SUBS.length;i++){
+        var s=SUBS[i];
+        if(sec>=s.t0&&sec<s.t1){
+            var fade=1;
+            if(sec-s.t0<1)fade=sec-s.t0;
+            if(s.t1-sec<1)fade=s.t1-sec;
+            fade=clamp(fade,0,1);
+            ctx.globalAlpha=fade;
+            ctx.fillStyle='rgba(0,0,0,0.65)';
+            var tw=ctx.measureText(s.text).width;
+            var bx=W/2-tw/2-16;
+            var by=H-38;
+            ctx.beginPath();
+            ctx.roundRect(bx,by,tw+32,30,8);
+            ctx.fill();
+            ctx.fillStyle=s.color;
+            ctx.font='bold 11px sans-serif';
+            ctx.textAlign='center';
+            ctx.fillText(s.speaker+':',W/2-tw/2-8,by+12);
+            ctx.fillStyle='#fff';
+            ctx.font='12px sans-serif';
+            ctx.fillText(s.text,W/2,by+22);
+            ctx.textAlign='left';
+            ctx.globalAlpha=1;
+            break;
+        }
+    }
+}
+
+/* ===== FADE TRANSITIONS ===== */
+var fadeAlpha=0;
+var fadeDir=0;
+function triggerFade(dir){fadeDir=dir;fadeAlpha=dir>0?0:1}
+function drawFade(ctx,W,H){
+    if(fadeDir===0)return;
+    fadeAlpha+=fadeDir*0.06;
+    if(fadeDir>0&&fadeAlpha>=1){fadeAlpha=1;fadeDir=0}
+    if(fadeDir<0&&fadeAlpha<=0){fadeAlpha=0;fadeDir=0}
+    ctx.fillStyle='rgba(0,0,0,'+fadeAlpha+')';
+    ctx.fillRect(0,0,W,H);
+}
 
 /* ===== CAMERA SYSTEM ===== */
 var CAMS={
@@ -281,26 +456,52 @@ var camState={};
 function initCam(){for(var i=1;i<=8;i++)camState[i]=0}
 initCam();
 
-function showCamPanel(sceneNum){
-    var panel=document.getElementById('camPanel');
-    var opts=document.getElementById('camOptions');
-    opts.innerHTML='';
+/* ===== SCENE PICKER (between scenes) ===== */
+var spTimer=null;
+var spActive=false;
+var SCENE_NAMES=['Кухня. Утро.','Пробуждение дрожжей','Создание теста','Настаивание','Приготовление начинки','Лепка пирожков','Выпечка','Дегустация'];
+
+function showScenePicker(sceneNum){
+    if(viewMode!=='auto'){applyCam(sceneNum);return;}
+    spActive=true;
+    var picker=document.getElementById('scenePicker');
+    var title=document.getElementById('spTitle');
+    var sub=document.getElementById('spSub');
+    var cards=document.getElementById('spCards');
+    var barFill=document.getElementById('spBarFill');
     var cams=CAMS[sceneNum];
-    if(!cams)return;
+    if(!cams){spActive=false;return;}
+
+    title.textContent='СЦЕНА '+sceneNum+': '+SCENE_NAMES[sceneNum-1];
+    sub.textContent='Выберите ракурс ('+cams.length+' варианта)';
+    cards.innerHTML='';
+    barFill.style.transition='none';
+    barFill.style.width='100%';
+
     cams.forEach(function(c,i){
-        var btn=document.createElement('div');
-        btn.className='cam-btn'+(camState[sceneNum]===i?' active':'');
-        btn.innerHTML='<span class="cam-icon">'+c.icon+'</span><span class="cam-name">'+c.name+'</span><span style="font-size:.75em;color:#aaa">'+c.desc+'</span>';
-        btn.onclick=function(){
+        var card=document.createElement('div');
+        card.className='sp-card'+(camState[sceneNum]===i?' active':'');
+        card.innerHTML='<span class="spc-icon">'+c.icon+'</span><span class="spc-name">'+c.name+'</span><span class="spc-desc">'+c.desc+'</span>';
+        card.onclick=function(){
             camState[sceneNum]=i;
-            camState.currentScene=sceneNum;
-            showCamPanel(sceneNum);
             applyCam(sceneNum);
+            closeScenePicker();
         };
-        opts.appendChild(btn);
+        cards.appendChild(card);
     });
-    panel.classList.add('on');
+
+    picker.classList.add('on');
+    setTimeout(function(){barFill.style.transition='width 3s linear';barFill.style.width='0%'},10);
+    spTimer=setTimeout(function(){closeScenePicker()},3000);
 }
+
+function closeScenePicker(){
+    clearTimeout(spTimer);
+    spActive=false;
+    document.getElementById('scenePicker').classList.remove('on');
+}
+
+function showCamPanel(sceneNum){}
 
 function applyCam(sceneNum){
     var cam=CAMS[sceneNum][camState[sceneNum]];
@@ -636,37 +837,64 @@ SC[3]=function(ctx,W,H,t){
 
     // Big bowl
     drawBowl(ctx,W/2,H-70,75,25,null,0);
-    // Dough (animated)
-    var dH=18+Math.sin(t*3)*4;
-    ctx.fillStyle='#f5e6c8';ctx.beginPath();ctx.ellipse(W/2,H-75,65,dH,0,0,Math.PI*2);ctx.fill();
-    // Dough texture
+    // Dough (animated) — physics: squish from kneading
+    var kneadPhase=Math.sin(t*3);
+    var squishX=65+Math.abs(kneadPhase)*8;
+    var squishY=18-kneadPhase*5;
+    ctx.fillStyle='#f5e6c8';
+    ctx.beginPath();ctx.ellipse(W/2,H-75,squishX,squishY,0,0,Math.PI*2);ctx.fill();
+    // Dough texture — moves with kneading
     ctx.fillStyle='rgba(210,180,130,0.3)';
     for(var i=0;i<5;i++){
-        ctx.beginPath();ctx.ellipse(W/2-20+i*10,H-75+Math.sin(t*2+i)*3,8,4,t*0.5+i,0,Math.PI*2);ctx.fill();
+        var tx=W/2-20+i*10+kneadPhase*3;
+        var ty=H-75+Math.sin(t*2+i)*3;
+        ctx.beginPath();ctx.ellipse(tx,ty,8,4,t*0.5+i+kneadPhase*0.2,0,Math.PI*2);ctx.fill();
+    }
+    // Gluten strands — stretch during knead
+    if(kneadPhase>0.3){
+        ctx.strokeStyle='rgba(210,180,130,'+(kneadPhase*0.25)+')';ctx.lineWidth=1;
+        for(var i=0;i<3;i++){
+            ctx.beginPath();
+            ctx.moveTo(W/2-15+i*15,H-80);
+            ctx.quadraticCurveTo(W/2-10+i*15,H-85-kneadPhase*6,W/2-5+i*15,H-80);
+            ctx.stroke();
+        }
     }
 
     // Flour bag
     ctx.fillStyle='#f0e68c';ctx.fillRect(W-160,H-90,45,35);
-    ctx.fillStyle='#333';ctx.font='bold 8px sans-serif';ctx.fillText('МУКА',W-155,H-70);
+    ctx.fillStyle='#333';ctx.font='bold 8px sans-serif';ctx.fillText('\u041c\u0423\u041a\u0410',W-155,H-70);
     ctx.fillStyle='rgba(255,255,255,0.3)';ctx.fillRect(W-158,H-88,41,1);
 
-    // Oil bottle
+    // Oil bottle — drip
     ctx.fillStyle='rgba(210,190,60,0.5)';ctx.fillRect(65,H-105,14,50);
     ctx.fillStyle='#654321';ctx.fillRect(68,H-115,8,12);
+    if(Math.sin(t*2)>0.9){
+        ctx.fillStyle='rgba(210,190,60,0.6)';
+        ctx.beginPath();ctx.arc(72,H-102+Math.sin(t*4)*2,2,0,Math.PI*2);ctx.fill();
+    }
 
     // Sugar bowl
     ctx.fillStyle='#eee';ctx.beginPath();ctx.ellipse(150,H-60,15,8,0,0,Math.PI*2);ctx.fill();
-    ctx.fillStyle='#fff';ctx.font='6px sans-serif';ctx.fillText('САХАР',140,H-58);
+    ctx.fillStyle='#fff';ctx.font='6px sans-serif';ctx.fillText('\u0421\u0410\u0425\u0410\u0420',140,H-58);
 
     // Salt
-    ctx.fillStyle='#ddd';ctx.fillRect(180,H-70,10,12);ctx.fillStyle='#888';ctx.font='5px sans-serif';ctx.fillText('СОЛЬ',178,H-62);
+    ctx.fillStyle='#ddd';ctx.fillRect(180,H-70,10,12);ctx.fillStyle='#888';ctx.font='5px sans-serif';ctx.fillText('\u0421\u041e\u041b\u042c',178,H-62);
 
-    // Flour particles
+    // Flour particles — burst during knead
     var fp=getP('flour');
-    if(Math.random()<0.2*D.animSpd&&Math.sin(t*4)>0)fp.add(W/2+Math.random()*60-30,H-100,Math.random()*2-1,-(0.5+Math.random()*2),1.5,'rgba(255,255,255,0.5)',1.5);
+    if(Math.random()<0.25*D.animSpd&&kneadPhase>0){
+        fp.add(W/2+Math.random()*60-30,H-100,Math.random()*3-1.5,-(0.5+Math.random()*3),1.5,'rgba(255,255,255,0.5)',1+Math.random()*1.5);
+    }
     fp.update(0.16);fp.draw(ctx);
 
+    // Chef hands — physics-based kneading
     drawChef(ctx,W/2,H-135,0.7,'knead','cheerful',t);
+
+    // Hand squish indicator
+    ctx.fillStyle='rgba(255,255,255,0.08)';
+    var hsy=H-80+kneadPhase*4;
+    ctx.beginPath();ctx.ellipse(W/2,hsy,12,4,0,0,Math.PI*2);ctx.fill();
 };
 
 SC[4]=function(ctx,W,H,t){
@@ -716,40 +944,78 @@ SC[5]=function(ctx,W,H,t){
     // Stove
     ctx.fillStyle='#3a3a3a';ctx.fillRect(350,H-100,200,70);
     ctx.fillStyle='#2a2a2a';ctx.fillRect(360,H-90,75,40);ctx.fillRect(445,H-90,75,40);
-    // Burner glow
-    var glow=0.4+Math.sin(t*3)*0.15;
-    ctx.fillStyle='rgba(255,80,0,'+glow+')';
+    // Burner glow — flicker physics
+    var flicker=0.4+Math.sin(t*3)*0.12+Math.sin(t*7.3)*0.05+Math.sin(t*11.7)*0.03;
+    ctx.fillStyle='rgba(255,80,0,'+flicker+')';
     ctx.beginPath();ctx.ellipse(397,H-70,25,8,0,0,Math.PI*2);ctx.fill();
+    // Flame tips
+    ctx.fillStyle='rgba(255,200,50,'+(flicker*0.7)+')';
+    for(var i=0;i<3;i++){
+        var fx=385+i*12;
+        var fh=5+Math.sin(t*5+i*2)*3;
+        ctx.beginPath();ctx.moveTo(fx,H-68);ctx.lineTo(fx+3,H-68-fh);ctx.lineTo(fx+6,H-68);ctx.fill();
+    }
 
     // Pan
     ctx.fillStyle='#555';ctx.beginPath();ctx.ellipse(397,H-68,42,14,0,0,Math.PI*2);ctx.fill();
     ctx.fillStyle='#444';ctx.fillRect(437,H-74,30,6);
     // Pan reflection
     ctx.fillStyle='rgba(255,255,255,0.08)';ctx.beginPath();ctx.ellipse(390,H-72,20,5,-0.2,0,Math.PI*2);ctx.fill();
+    // Oil sheen — animated
+    ctx.fillStyle='rgba(200,180,50,'+(0.1+Math.sin(t*2)*0.05)+')';
+    ctx.beginPath();ctx.ellipse(395,H-68,30,8,0,0,Math.PI*2);ctx.fill();
 
-    // Meat in pan
-    ctx.fillStyle='#8B4513';ctx.beginPath();ctx.ellipse(390,H-68,18,6,0,0,Math.PI*2);ctx.fill();
+    // Meat in pan — browning animation
+    var browning=clamp(t/6,0,1);
+    var meatR=139+browning*40|0;
+    var meatG=69+browning*30|0;
+    var meatB=19+browning*10|0;
+    ctx.fillStyle='rgb('+meatR+','+meatG+','+meatB+')';
+    ctx.beginPath();ctx.ellipse(390,H-68,18,6,0,0,Math.PI*2);ctx.fill();
     ctx.fillStyle='#a0522d';ctx.beginPath();ctx.ellipse(405,H-65,12,5,0.3,0,Math.PI*2);ctx.fill();
+    // Browning crust detail
+    if(browning>0.3){
+        ctx.fillStyle='rgba(100,50,0,'+(browning*0.3)+')';
+        ctx.beginPath();ctx.ellipse(390,H-70,14,3,0,0,Math.PI*2);ctx.fill();
+    }
 
-    // Sizzle particles
+    // Sizzle particles — physics: gravity + splash
     var sp=getP('sizzle');
-    if(Math.random()<0.4*D.animSpd)sp.add(380+Math.random()*40,H-80,Math.random()*2-1,-(2+Math.random()*3),1,'rgba(255,200,50,0.7)',1.5);
+    if(Math.random()<0.5*D.animSpd){
+        var sx=380+Math.random()*40;
+        sp.add(sx,H-78,Math.random()*3-1.5,-(2+Math.random()*4),0.8+Math.random()*0.5,'rgba(255,200,50,0.8)',1+Math.random());
+    }
+    // Oil splatter — occasional big drops
+    if(Math.random()<0.05*D.animSpd){
+        sp.add(390+Math.random()*20,H-80,Math.random()*4-2,-(4+Math.random()*3),1.2,'rgba(255,180,30,0.9)',2+Math.random());
+    }
     sp.update(0.16);sp.draw(ctx);
 
     // Cutting board
     ctx.fillStyle='#c8a96e';ctx.fillRect(50,H-65,110,10);ctx.strokeStyle='#b0955a';ctx.strokeRect(50,H-65,110,10);
+    // Knife marks on board
+    ctx.strokeStyle='rgba(160,130,80,0.2)';ctx.lineWidth=0.5;
+    for(var i=0;i<6;i++){ctx.beginPath();ctx.moveTo(60+i*15,H-63);ctx.lineTo(65+i*15,H-58);ctx.stroke();}
 
     // Knife
     ctx.fillStyle='#999';ctx.fillRect(168,H-80,3,30);
     ctx.fillStyle='#654321';ctx.fillRect(165,H-83,10,6);
     // Knife edge shine
     ctx.fillStyle='rgba(255,255,255,0.3)';ctx.fillRect(168,H-78,1,25);
+    // Chop animation
+    var chopY=Math.abs(Math.sin(t*4))*3;
+    ctx.save();ctx.translate(168,H-80-chopY);ctx.rotate(Math.sin(t*4)*0.05);
+    ctx.fillStyle='#999';ctx.fillRect(0,0,3,30);
+    ctx.restore();
 
     // Onion halves
     ctx.fillStyle='#ffe4b5';
     ctx.beginPath();ctx.arc(80,H-70,10,0,Math.PI*2);ctx.fill();
     ctx.fillStyle='#f5deb3';ctx.beginPath();ctx.arc(80,H-70,7,0,Math.PI*2);ctx.fill();
     ctx.beginPath();ctx.arc(120,H-72,9,0,Math.PI*2);ctx.fill();
+    // Onion rings detail
+    ctx.strokeStyle='rgba(200,180,100,0.3)';ctx.lineWidth=0.5;
+    ctx.beginPath();ctx.arc(80,H-70,5,0,Math.PI*2);ctx.stroke();
 
     // Herbs
     ctx.fillStyle='#228B22';
@@ -758,6 +1024,9 @@ SC[5]=function(ctx,W,H,t){
     // Pepper grinder
     ctx.fillStyle='#333';ctx.fillRect(230,H-95,10,35);
     ctx.fillStyle='#555';ctx.fillRect(228,H-100,14,8);
+
+    // Steam from pan — rises and disperses
+    drawSteam(ctx,397,H-85,5,t,1.5);
 
     // Chef
     drawChef(ctx,280+D.camX,H-125+D.camY,0.65,'cut','cheerful',t);
@@ -970,14 +1239,14 @@ function tick(){
 
     if(camState.currentScene!==currentScene&&currentScene>0){
         camState.currentScene=currentScene;
-        showCamPanel(currentScene);
+        showScenePicker(currentScene);
     }
 
     SCENES.forEach(function(sc){
         var el=document.getElementById(sc.id);
         var la=document.getElementById(sc.lid);
         if(T>=sc.t0&&T<sc.t1){
-            if(el.style.display!=='block')el.style.display='block';
+            if(el.style.display!=='block'){el.style.display='block';triggerFade(1)}
             el.classList.add('on');
             la.classList.remove('on');
             var info=getC(sc.cid);
@@ -993,6 +1262,8 @@ function tick(){
                 info.x.translate(-info.c.width/2,-info.c.height/2);
                 SC[sc.id.split('s')[1]](info.x,info.c.width,info.c.height,localT*12*animT);
                 info.x.restore();
+                drawSubtitles(info.x,info.c.width,info.c.height,localT*12*animT);
+                drawFade(info.x,info.c.width,info.c.height);
             }
         }else{
             if(T>=sc.t1&&T<sc.t1+3){
@@ -1006,7 +1277,7 @@ function tick(){
         document.getElementById(ep.id).style.display=(T>=ep.t&&T<ep.t+8)?'block':'none';
     });
 
-    if(T>=TOTAL){document.getElementById('finScr').style.display='block';stop();}
+    if(T>=TOTAL){document.getElementById('finScr').style.display='block';showReplay();stop();}
 }
 
 function go(){if(running)return;running=true;iv=setInterval(function(){T++;tick()},1000/spd)}
@@ -1022,6 +1293,63 @@ document.onkeydown=function(e){
     if(e.code==='ArrowLeft'){T=Math.max(T-30,0);tick();}
     if(e.code==='KeyD')toggleDir();
 };
+
+/* ===== VIEW MODE ===== */
+var viewMode='auto';
+function selectView(mode){
+    viewMode=mode;
+    document.querySelectorAll('.vm-card').forEach(function(el){el.classList.toggle('active',el.dataset.mode===mode)});
+    if(mode!=='auto'){
+        var presets={closeup:1,wide:2,drama:1};
+        var moods={closeup:'cheerful',wide:'calm',drama:'dramatic'};
+        var lights={closeup:90,wide:80,drama:45};
+        for(var i=1;i<=8;i++)camState[i]=presets[mode]||0;
+        D.mood=moods[mode]||'cheerful';
+        D.light=lights[mode]||80;
+    }
+}
+
+/* ===== AUTO-HIDE CONTROLS ===== */
+var ctrlTimer=null;
+function showCtrls(){
+    var c=document.querySelector('.ctrls');if(!c)return;
+    c.classList.remove('hide');
+    clearTimeout(ctrlTimer);
+    ctrlTimer=setTimeout(function(){if(running)c.classList.add('hide')},3000);
+}
+document.addEventListener('mousemove',showCtrls);
+document.addEventListener('touchstart',showCtrls);
+
+/* ===== REPLAY PRESETS ===== */
+var REPLAY_PRESETS={
+    closeup:{
+        1:1, 2:1, 3:1, 4:1, 5:1, 6:1, 7:1, 8:1,
+        mood:'cheerful', light:90
+    },
+    wide:{
+        1:2, 2:2, 3:2, 4:2, 5:2, 6:2, 7:2, 8:2,
+        mood:'calm', light:80
+    },
+    drama:{
+        1:1, 2:1, 3:1, 4:0, 5:1, 6:1, 7:1, 8:1,
+        mood:'dramatic', light:45
+    }
+};
+function replayWith(preset){
+    var p=REPLAY_PRESETS[preset];if(!p)return;
+    for(var i=1;i<=8;i++){
+        if(p[i]!==undefined)camState[i]=p[i];
+    }
+    D.mood=p.mood;D.light=p.light;
+    var m=document.getElementById('mood');if(m)m.value=p.mood;
+    var l=document.getElementById('light');if(l)l.value=p.light;
+    T=0;
+    document.getElementById('finScr').style.display='none';
+    document.querySelectorAll('.scene').forEach(function(el){el.style.display='none';el.classList.remove('on')});
+    document.querySelectorAll('.laugh').forEach(function(el){el.classList.remove('on')});
+    go();
+}
+function showReplay(){document.getElementById('replayPanel').classList.add('on')}
 
 drawIntro();tick();
 </script>
