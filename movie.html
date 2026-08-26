@@ -1,0 +1,1660 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Пирожки с нуля: Тесто Времени</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #1a1a2e;
+            color: #fff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow-x: hidden;
+        }
+
+        .movie-container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .title-screen {
+            text-align: center;
+            padding: 80px 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 20px;
+            margin-bottom: 30px;
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow {
+            from { box-shadow: 0 0 20px #667eea; }
+            to { box-shadow: 0 0 40px #764ba2; }
+        }
+
+        .title-screen h1 {
+            font-size: 2.8em;
+            margin-bottom: 10px;
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.5);
+        }
+
+        .title-screen .subtitle {
+            font-size: 1.3em;
+            opacity: 0.9;
+            margin-bottom: 30px;
+        }
+
+        .timer-display {
+            font-size: 2em;
+            font-family: 'Courier New', monospace;
+            background: #000;
+            padding: 15px 30px;
+            border-radius: 10px;
+            display: inline-block;
+            border: 3px solid #0f0;
+            color: #0f0;
+            text-shadow: 0 0 10px #0f0;
+        }
+
+        .controls {
+            text-align: center;
+            margin: 30px 0;
+            position: sticky;
+            top: 10px;
+            z-index: 100;
+            background: rgba(26, 26, 46, 0.95);
+            padding: 15px;
+            border-radius: 15px;
+            border: 2px solid #667eea;
+        }
+
+        .controls button {
+            padding: 12px 30px;
+            font-size: 1.1em;
+            margin: 0 10px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+        }
+
+        .btn-play { background: #4CAF50; color: white; }
+        .btn-pause { background: #ff9800; color: white; }
+        .btn-reset { background: #f44336; color: white; }
+        .btn-speed { background: #9c27b0; color: white; }
+
+        .controls button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        .controls button:active {
+            transform: scale(0.95);
+        }
+
+        .speed-display {
+            display: inline-block;
+            margin-left: 15px;
+            font-size: 0.9em;
+            color: #aaa;
+        }
+
+        .scene {
+            background: #16213e;
+            border-radius: 15px;
+            margin: 25px 0;
+            overflow: hidden;
+            border: 2px solid #0f3460;
+            opacity: 0.5;
+            transform: scale(0.98);
+            transition: all 0.5s;
+        }
+
+        .scene.active {
+            opacity: 1;
+            transform: scale(1);
+            border-color: #667eea;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+        }
+
+        .scene-header {
+            background: linear-gradient(90deg, #0f3460, #533483);
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .scene-number {
+            background: #e94560;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+
+        .scene-time {
+            font-family: 'Courier New', monospace;
+            color: #0f0;
+            font-size: 1.1em;
+        }
+
+        .scene-title {
+            padding: 15px 20px;
+            font-size: 1.4em;
+            font-weight: bold;
+            background: rgba(0,0,0,0.2);
+        }
+
+        .scene-content {
+            padding: 20px;
+        }
+
+        .shot {
+            background: rgba(255,255,255,0.05);
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 0 10px 10px 0;
+            opacity: 0;
+            transform: translateX(-20px);
+            transition: all 0.5s;
+        }
+
+        .scene.active .shot {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .shot-time {
+            font-family: 'Courier New', monospace;
+            color: #0f0;
+            font-size: 0.85em;
+            margin-bottom: 8px;
+        }
+
+        .shot-desc {
+            color: #ccc;
+            margin-bottom: 10px;
+            line-height: 1.5;
+        }
+
+        .character-speech {
+            background: rgba(102, 126, 234, 0.2);
+            border-radius: 10px;
+            padding: 12px 15px;
+            margin: 10px 0;
+            border-left: 3px solid #667eea;
+        }
+
+        .character-name {
+            color: #e94560;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .dialogue {
+            color: #fff;
+            font-style: italic;
+        }
+
+        .animation-desc {
+            color: #ffd700;
+            font-size: 0.9em;
+            margin: 8px 0;
+            padding: 8px;
+            background: rgba(255, 215, 0, 0.1);
+            border-radius: 5px;
+        }
+
+        .sound-desc {
+            color: #87ceeb;
+            font-size: 0.85em;
+        }
+
+        .laugh-track {
+            background: linear-gradient(90deg, #ff6b6b, #feca57);
+            color: #000;
+            text-align: center;
+            padding: 20px;
+            font-size: 1.5em;
+            font-weight: bold;
+            border-radius: 10px;
+            margin-top: 20px;
+            opacity: 0;
+            transform: scale(0.8);
+            transition: all 0.5s;
+        }
+
+        .laugh-track.show {
+            opacity: 1;
+            transform: scale(1);
+            animation: laughBounce 0.5s ease;
+        }
+
+        @keyframes laughBounce {
+            0%, 100% { transform: scale(1); }
+            25% { transform: scale(1.1); }
+            50% { transform: scale(0.95); }
+            75% { transform: scale(1.05); }
+        }
+
+        .laugh-emoji {
+            font-size: 2em;
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #333;
+            border-radius: 4px;
+            margin: 15px 0;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            width: 0%;
+            transition: width 0.3s;
+            border-radius: 4px;
+        }
+
+        .episode-marker {
+            background: #0f3460;
+            padding: 20px;
+            text-align: center;
+            margin: 30px 0 15px 0;
+            border-radius: 10px;
+            border: 2px dashed #667eea;
+            opacity: 0;
+            transition: all 0.5s;
+        }
+
+        .episode-marker.show {
+            opacity: 1;
+        }
+
+        .episode-marker h2 {
+            color: #e94560;
+            font-size: 1.8em;
+            margin-bottom: 5px;
+        }
+
+        .episode-marker p {
+            color: #aaa;
+        }
+
+        .finale {
+            text-align: center;
+            padding: 60px 20px;
+            background: linear-gradient(135deg, #e94560 0%, #533483 100%);
+            border-radius: 20px;
+            margin-top: 30px;
+        }
+
+        .finale h1 {
+            font-size: 2.5em;
+            margin-bottom: 20px;
+        }
+
+        .recipe-card {
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+            padding: 30px;
+            margin: 20px 0;
+            text-align: left;
+        }
+
+        .recipe-card h3 {
+            color: #ffd700;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+
+        .recipe-card ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .recipe-card li {
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .recipe-card li::before {
+            content: "✓ ";
+            color: #4CAF50;
+        }
+
+        .visual-scene {
+            background: #000;
+            border-radius: 15px;
+            padding: 40px;
+            margin: 20px 0;
+            text-align: center;
+            min-height: 300px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .kitchen-bg {
+            background: linear-gradient(180deg, #87ceeb 0%, #87ceeb 60%, #8b4513 60%, #8b4513 100%);
+        }
+
+        .chef {
+            font-size: 8em;
+            animation: chefBounce 1s ease-in-out infinite;
+            position: relative;
+            z-index: 10;
+        }
+
+        @keyframes chefBounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+
+        .food-items {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+        }
+
+        .food-item {
+            position: absolute;
+            font-size: 3em;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-30px) rotate(10deg); }
+        }
+
+        .bubbles {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+        }
+
+        .bubble {
+            position: absolute;
+            background: rgba(255,255,255,0.3);
+            border-radius: 50%;
+            animation: rise 2s ease-in infinite;
+        }
+
+        @keyframes rise {
+            0% { transform: translateY(100%) scale(0); opacity: 1; }
+            100% { transform: translateY(-100%) scale(1); opacity: 0; }
+        }
+
+        .steam {
+            position: absolute;
+            font-size: 2em;
+            animation: steamRise 2s ease-out infinite;
+            opacity: 0.6;
+        }
+
+        @keyframes steamRise {
+            0% { transform: translateY(0) scale(1); opacity: 0.6; }
+            100% { transform: translateY(-100px) scale(2); opacity: 0; }
+        }
+
+        .timer-fast {
+            animation: timerPulse 0.5s ease-in-out infinite;
+        }
+
+        @keyframes timerPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); color: #ff0; }
+        }
+
+        .oven-glow {
+            animation: ovenGlow 1s ease-in-out infinite alternate;
+        }
+
+        @keyframes ovenGlow {
+            from { box-shadow: inset 0 0 30px rgba(255,100,0,0.5); }
+            to { box-shadow: inset 0 0 60px rgba(255,100,0,0.8); }
+        }
+
+        .pirozhok {
+            font-size: 4em;
+            display: inline-block;
+            margin: 10px;
+            animation: pirozhokPop 0.5s ease-out;
+        }
+
+        @keyframes pirozhokPop {
+            0% { transform: scale(0) rotate(-180deg); }
+            100% { transform: scale(1) rotate(0deg); }
+        }
+
+        .aroma-clouds {
+            position: absolute;
+            font-size: 3em;
+            animation: aromaFloat 3s ease-in-out infinite;
+        }
+
+        @keyframes aromaFloat {
+            0%, 100% { transform: translateY(0) translateX(0); opacity: 0.7; }
+            50% { transform: translateY(-50px) translateX(20px); opacity: 1; }
+        }
+
+        .sound-wave {
+            display: inline-block;
+            width: 4px;
+            height: 20px;
+            background: #fff;
+            margin: 0 2px;
+            animation: soundWave 0.5s ease-in-out infinite;
+        }
+
+        @keyframes soundWave {
+            0%, 100% { height: 10px; }
+            50% { height: 30px; }
+        }
+
+        .laugh-visual {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .laugh-visual.show {
+            display: flex;
+        }
+
+        .laugh-content {
+            text-align: center;
+            animation: laughZoom 0.5s ease;
+        }
+
+        @keyframes laughZoom {
+            0% { transform: scale(0); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+
+        .laugh-content .big-emoji {
+            font-size: 8em;
+            display: block;
+            margin-bottom: 20px;
+        }
+
+        .laugh-text {
+            font-size: 2em;
+            color: #ffd700;
+            font-weight: bold;
+        }
+
+        @media (max-width: 768px) {
+            .title-screen h1 { font-size: 1.8em; }
+            .controls button { padding: 10px 15px; font-size: 0.9em; }
+            .chef { font-size: 5em; }
+            .timer-display { font-size: 1.5em; padding: 10px 20px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="movie-container">
+        <!-- Title Screen -->
+        <div class="title-screen">
+            <h1> Пирожки с нуля </h1>
+            <div class="subtitle">Тесто Времени | Кино-мультик | 15 минут</div>
+            <div class="timer-display" id="mainTimer">00:00</div>
+        </div>
+
+        <!-- Controls -->
+        <div class="controls">
+            <button class="btn-play" onclick="playMovie()">▶ Играть</button>
+            <button class="btn-pause" onclick="pauseMovie()">⏸ Пауза</button>
+            <button class="btn-reset" onclick="resetMovie()">⏹ Сброс</button>
+            <button class="btn-speed" onclick="changeSpeed()">⏩ Скорость</button>
+            <span class="speed-display">Скорость: <span id="speedValue">1x</span></span>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+        </div>
+
+        <!-- Episode Markers -->
+        <div class="episode-marker" id="ep0">
+            <h2> ПРОЛОГ </h2>
+            <p>Знакомство с Шефом Вишенкой</p>
+        </div>
+
+        <!-- Scene 1: Kitchen Morning -->
+        <div class="scene" id="scene1">
+            <div class="scene-header">
+                <span class="scene-number">СЦЕНА 1</span>
+                <span class="scene-time">00:00 - 01:30</span>
+            </div>
+            <div class="scene-title"> Кухня. Утро. </div>
+            <div class="scene-content">
+                <!-- Visual -->
+                <div class="visual-scene kitchen-bg">
+                    <div class="food-items">
+                        <div class="food-item" style="top:20%;left:10%;animation-delay:0s"> </div>
+                        <div class="food-item" style="top:30%;right:15%;animation-delay:0.5s"> </div>
+                        <div class="food-item" style="top:50%;left:20%;animation-delay:1s"> </div>
+                        <div class="food-item" style="top:60%;right:25%;animation-delay:1.5s"> </div>
+                    </div>
+                    <div class="chef"> ‍ </div>
+                </div>
+
+                <!-- Shot 1.1 -->
+                <div class="shot">
+                    <div class="shot-time">00:00 - 00:15</div>
+                    <div class="shot-desc">Камера медленно поднимается над кухонным столом. На столе: мука, вода, дрожжи.</div>
+                    <div class="animation-desc"> [АНИМАЦИЯ] Плавный подъём камеры, мерцание воды, покачивание пачки] </div>
+                    <div class="sound-desc"> [ЗВУК] Тихая утренняя музыка, пение птиц] </div>
+                </div>
+
+                <!-- Shot 1.2 -->
+                <div class="shot">
+                    <div class="shot-time">00:15 - 00:30</div>
+                    <div class="shot-desc">В кадр входит Шеф-Повар. Хлопает в ладоши.</div>
+                    <div class="character-speech">
+                        <div class="character-name">ШЕФ ВИШЕНКА</div>
+                        <div class="dialogue">"Привет, друзья! Я — Шеф Вишенка! И сегодня мы приготовим Пирожки Мечты!"</div>
+                    </div>
+                    <div class="animation-desc"> [АНИМАЦИЯ] Шеф входит, хлопает — искры из ладоней] </div>
+                </div>
+
+                <!-- Shot 1.3 -->
+                <div class="shot">
+                    <div class="shot-time">00:30 - 00:45</div>
+                    <div class="shot-desc">Шеф показывает пачку дрожжей. Пачка "улыбается".</div>
+                    <div class="character-speech">
+                        <div class="character-name">ШЕФ ВИШЕНКА</div>
+                        <div class="dialogue">"Сегодня мы приготовим Пирожки Мечты! Из покупного теста — но так, что оно станет домашним!"</div>
+                    </div>
+                </div>
+
+                <!-- Shot 1.4 -->
+                <div class="shot">
+                    <div class="shot-time">00:45 - 01:00</div>
+                    <div class="shot-desc">На экране появляется таймер. Шеф нажимает кнопку.</div>
+                    <div class="character-speech">
+                        <div class="character-name">ШЕФ ВИШЕНКА</div>
+                        <div class="dialogue">"Запускаем таймер! Пятнадцать минут — и у нас будут идеальные пирожки!" </div>
+                    </div>
+                    <div class="animation-desc"> [ТАЙМЕР] 00:00 запускается] </div>
+                </div>
+
+                <!-- Shot 1.5-1.6 -->
+                <div class="shot">
+                    <div class="shot-time">01:00 - 01:30</div>
+                    <div class="shot-desc">Титры эпизода. Шеф берёт миску и кувшин.</div>
+                    <div class="character-speech">
+                        <div class="character-name">ШЕФ ВИШЕНКА</div>
+                        <div class="dialogue">"Итак, первый шаг — тёплая вода. Не горячая, не холодная — тёплая."</div>
+                    </div>
+                </div>
+
+                <!-- Laugh Track -->
+                <div class="laugh-track" id="laugh1">
+                    <span class="laugh-emoji">😂 🤣 😆</span>
+                    ХА-ХА-ХА!
+                    <span class="laugh-emoji">😂 🤣 😆</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Episode Marker 1 -->
+        <div class="episode-marker" id="ep1">
+            <h2> ЭПИЗОД 1: ПРОБУЖДЕНИЕ </h2>
+            <p>Активация дрожжей (1:30 - 4:00)</p>
+        </div>
+
+        <!-- Scene 2: Yeast Activation -->
+        <div class="scene" id="scene2">
+            <div class="scene-header">
+                <span class="scene-number">СЦЕНА 2</span>
+                <span class="scene-time">01:30 - 04:00</span>
+            </div>
+            <div class="scene-title"> Пробуждение дрожжей </div>
+            <div class="scene-content">
+                <!-- Visual -->
+                <div class="visual-scene" style="background: linear-gradient(180deg, #1a1a2e, #16213e)">
+                    <div class="bubbles" id="bubbles1">
+                    </div>
+                    <div style="font-size:5em; z-index:10; position:relative">
+                         <br><span style="font-size:0.5em"> +  + </span>
+                    </div>
+                </div>
+
+                <!-- Shot 2.1 -->
+                <div class="shot">
+                    <div class="shot-time">01:30 - 01:45</div>
+                    <div class="shot-desc">Крупный план термометра: 37-40°C.</div>
+                    <div class="character-speech">
+                        <div class="character-name">ДИКТОР</div>
+                        <div class="dialogue">"Тридцать семь-сорок градусов. Идеальная температура для дрожжей."</div>
+                    </div>
+                </div>
+
+                <!-- Shot 2.2 -->
+                <div class="shot">
+                    <div class="shot-time">01:45 - 02:00</div>
+                    <div class="shot-desc">Шеф высыпает дрожжи в воду. Гранулы падают.</div>
+                    <div class="character-speech">
+                        <div class="character-name">ШЕФ ВИШЕНКА</div>
+                        <div class="dialogue">"Аккуратно высыпаем дрожжи. Смотрите, как они плавают!" </div>
+                    </div>
+                    <div class="animation-desc"> [АНИМАЦИЯ] Гранулы падают, some float, some sink] </div>
+                </div>
+
+                <!-- Shot 2.3 -->
+                <div class="shot">
+                    <div class="shot-time">02:00 - 02:15</div>
+                    <div class="shot-desc">Добавление сахара. Кристаллы тают.</div>
+                    <div class="character-speech">
+                        <div class="character-name">ШЕФ ВИШЕНКА</div>
+                        <div class="dialogue">"Сахар — это еда для дрожжей. Они его обожают!" </div>
+                    </div>
+                </div>
+
+                <!-- Shot 2.4 -->
+                <div class="shot">
+                    <div class="shot-time">02:15 - 02:30</div>
+                    <div class="shot-desc">Размешивание. Накрытие полотенцем.</div>
+                    <div class="character-speech">
+                        <div class="character-name">ШЕФ ВИШЕНКА</div>
+                        <div class="dialogue">"Перемешали и накрыли. Теперь ждём десять минут."</div>
+                    </div>
+                </div>
+
+                <!-- Shot 2.5-2.6 -->
+                <div class="shot">
+                    <div class="shot-time">02:30 - 03:00</div>
+                    <div class="shot-desc">Полотенце "дышит". Облачка вырываются.</div>
+                    <div class="animation-desc"> [АНИМАЦИЯ] Полотенце поднимается-опускается, облачка газа] </div>
+                    <div class="sound-desc"> [ЗВУК] Soft bubbling, rhythmic breathing] </div>
+                </div>
+
+                <!-- Shot 2.7 -->
+                <div class="shot">
+                    <div class="shot-time">03:00 - 03:15</div>
+                    <div class="shot-desc">Таймер ускоряется: 03:00 → 04:00.</div>
+                    <div class="animation-desc"> [ТАЙМЕР] Ускорение ×20] </div>
+                </div>
+
+                <!-- Shot 2.8-2.9 -->
+                <div class="shot">
+                    <div class="shot-time">03:15 - 03:45</div>
+                    <div class="shot-desc">Шеф снимает полотенце — пенная шапка!</div>
+                    <div class="character-speech">
+                        <div class="character-name">ШЕФ ВИШЕНКА</div>
+                        <div class="dialogue">"Вот это да! Дрожжи проснулись и начали работать!" </div>
+                    </div>
+                    <div class="character-speech">
+                        <div class="character-name">ШЕФ ВИШЕНКА</div>
+                        <div class="dialogue">"Видите эти пузырьки? Это углекислый газ. Именно он поднимет наше тесто!" </div>
+                    </div>
+                </div>
+
+                <!-- Laugh Track -->
+                <div class="laugh-track" id="laugh2">
+                    <span class="laugh-emoji"> 🤣 😂 😆</span>
+                    ХА-ХА-ХА!
+                    <span class="laugh-emoji"> 🤣 😂 😆</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Episode Marker 2 -->
+        <div class="episode-marker" id="ep2">
+            <h2> ЭПИЗОД 2: СМЕШЕНИЕ </h2>
+            <p>Создание теста (4:00 - 7:00)</p>
+        </div>
+
+        <!-- Scene 3: Dough Creation -->
+        <div class="scene" id="scene3">
+            <div class="scene-header">
+                <span class="scene-number">СЦЕНА 3</span>
+                <span class="scene-time">04:00 - 07:00</span>
+            </div>
+            <div class="scene-title"> Создание теста </div>
+            <div class="scene-content">
+                <!-- Visual -->
+                <div class="visual-scene" style="background: linear-gradient(180deg, #fff5e6, #ffe4c4)">
+                    <div class="food-items">
+                        <div class="food-item" style="top:20%;left:10%"> </div>
+                        <div class="food-item" style="top:40%;right:10%"> </div>
+                        <div class="food-item" style="bottom:20%;left:30%"> </div>
+                    </div>
+                    <div style="font-size:6em; z-index:10; position:relative"> </div>
+                </div>
+
+                <!-- Shot 3.1 -->
+                <div class="shot">
+                    <div class="shot-time">04:00 - 04:15</div>
+                    <div class="shot-desc">Шеф берёт большую миску. Ставит на стол.</div>
+                    <div class="character-speech">
+                        <div class="character-name">ШЕФ ВИШЕНКА</div>
+                        <div class="dialogue">"А теперь — главный ингредиент. Мука!" </div>
+                    </div>
+                </div>
+
+                <!-- Shot 3.2 -->
+                <div class="shot">
+                    <div class="shot-time">04:15 - 04:30</div>
+                    <div class="shot-desc">500 г муки высыпается горкой. Облачко пыли.</div>
+                    <div class="character-speech">
+                        <div class="character-name">ДИКТОР</div>
+                        <div class="dialogue">"Пятьсот граммов муки высшего сорта. Обязательно просеиваем!" </div>
+                    </div>
+                </div>
+
+                <!-- Shot 3.3 -->
+                <div class="shot">
+                    <div class="shot-time">04:30 - 04:45</div>
+                    <div class="shot-desc">Углубление в муке. Вливание дрожжевой смеси.</div>
+                    <div class="character-speech">
+                        <div class="character-name">ШЕФ ВИШЕНКА</div>
+                        <div class="dialogue">"Делаем углубление и вливаем наши дрожжи."</div>
+                    </div>
+                </div>
+
+                <!-- Shot 3.4 -->
+                <div class="shot">
+                    <div class="shot-time">04:45 - 05:00</div>
+                    <div class="shot-desc">Добавление масла, соли, сахара.</div>
+                    <div class="character-speech">
+                        <div class="character-name">ШЕФ ВИШЕНКА</div>
+                        <div class="dialogue">"Масло — для эластичности. Соль — для вкуса. Сахар — для мягкости."</div>
+                    </div>
+                </div>
+
+                <!-- Shot 3.5-3.6 -->
+                <div class="shot">
+                    <div class="shot-time">05:00 - 05:30</div>
+                    <div class="shot-desc">Замес теста. Мука впитывает жидкость.</div>
+                    <div class="character-speech">
+                        <div class="character-name">ШЕФ ВИШЕНКА</div>
+                        <div class="dialogue">"Начинаем месить. Медленно, аккуратно."</div>
+                    </div>
+                    <div class="animation-desc"> [АНИМАЦИЯ] Руки месят, тесто собирается в ком] </div>
+                </div>
+
+                <!-- Shot 3.7 -->
+                <div class="shot">
+                    <div class="shot-time">05:30 - 06:00</div>
+                    <div class="shot-desc">Таймер ускоряется: 05:30 → 06:30.</div>
+                    <div class="character-speech">
+                        <div class="character-name">ШЕФ ВИШЕНКА</div>
+                        <div class="dialogue">"Месим 10-15 минут! Тесто должно стать мягким, как облачко!" </div>
+                    </div>
+                </div>
+
+                <!-- Shot 3.8 -->
+                <div class="shot">
+                    <div class="shot-time">06:00 - 06:30</div>
+                    <div class="shot-desc">Тесто меняет текстуру — гладкое, упругое.</div>
+                    <div class="character-speech">
+                        <div class="character-name">ШЕФ ВИШЕНКА</div>
+                        <div class="dialogue">"Вот оно — идеальное тесто! Гладкое, упругое, не липнет к рукам."</div>
+                    </div>
+                </div>
+
+                <!-- Shot 3.9-3.12 -->
+                <div class="shot">
+                    <div class="shot-time">06:30 - 07:00</div>
+                    <div class="shot-desc">Шар из теста. Накрытие полотенцем.</div>
+                    <div class="character-speech">
+                        <div class="character-name">ШЕФ ВИШЕНКА</div>
+                        <div class="dialogue">"Теперь тесто должно подняться. Отправляем его в 'спальню' на один час!" </div>
+                    </div>
+                </div>
+
+                <!-- Laugh Track -->
+                <div class="laugh-track" id="laugh3">
+                    <span class="laugh-emoji"> 😂 🤣 😆</span>
+                    ХА-ХА-ХА!
+                    <span class="laugh-emoji"> 😂 🤣 😆</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Episode Marker 3 -->
+        <div class="episode-marker" id="ep3">
+            <h2> ЭПИЗОД 3: ОЖИДАНИЕ </h2>
+            <p>Настаивание теста (7:00 - 9:00)</p>
+        </div>
+
+        <!-- Scene 4: Dough Rising -->
+        <div class="scene" id="scene4">
+            <div class="scene-header">
+                <span class="scene-number">СЦЕНА 4</span>
+                <span class="scene-time">07:00 - 09:00</span>
+            </div>
+            <div class="scene-title"> Настаивание теста </div>
+            <div class="scene-content">
+                <!-- Visual -->
+                <div class="visual-scene" style="background: linear-gradient(180deg, #2d1b4e, #1a1a2e)">
+                    <div style="font-size:4em; z-index:10; position:relative">
+                         <span style="font-size:0.5em; display:block"> </span>
+                    </div>
+                </div>
+
+                <!-- Shot 4.1 -->
+                <div class="shot">
+                    <div class="shot-time">07:00 - 07:15</div>
+                    <div class="shot-desc">Таймер ускоряется: 07:00 → 15:00.</div>
+                    <div class="animation-desc"> [ТАЙМЕР] Ускорение ×60 — один час за 15 секунд] </div>
+                </div>
+
+                <!-- Shot 4.2 -->
+                <div class="shot">
+                    <div class="shot-time">07:15 - 07:30</div>
+                    <div class="shot-desc">Тесто под полотенцем увеличивается вдвое.</div>
+                    <div class="character-speech">
+                        <div class="character-name">ДИКТОР</div>
+                        <div class="dialogue">"Один час брожения. Дрожжи работают, выделяя газ. Тесто поднимается вдвое."</div>
+                    </div>
+                </div>
+
+                <!-- Shot 4.3 -->
+                <div class="shot">
+                    <div class="shot-time">07:30 - 07:45</div>
+                    <div class="shot-desc">Шеф читает книгу "Тайны хлебопечения".</div>
+                    <div class="character-speech">
+                        <div class="character-name">ШЕФ ВИШЕНКА</div>
+                        <div class="dialogue">"Терпение — ключ к хорошему тесту. Нельзя торопить дрожжи."</div>
+                    </div>
+                </div>
+
+                <!-- Shot 4.4-4.5 -->
+                <div class="shot">
+                    <div class="shot-time">07:45 - 08:15</div>
+                    <div class="shot-desc">Снятие полотенца — пышное тесто!</div>
+                    <div class="character-speech">
+                        <div class="character-name">ШЕФ ВИШЕНКА</div>
+                        <div class="dialogue">"Великолепно! Тесто поднялось вдвое! Оно готово к следующему шагу."</div>
+                    </div>
+                </div>
+
+                <!-- Shot 4.6 -->
+                <div class="shot">
+                    <div class="shot-time">08:15 - 08:30</div>
+                    <div class="shot-desc">Обминка теста — выпуск воздуха.</div>
+                    <div class="character-speech">
+                        <div class="character-name">ШЕФ ВИШЕНКА</div>
+                        <div class="dialogue">"Обминаем тесто. Выпускаем лишний воздух."</div>
+                    </div>
+                </div>
+
+                <!-- Shot 4.7-4.8 -->
+                <div class="shot">
+                    <div class="shot-time">08:30 - 09:00</div>
+                    <div class="shot-desc">Колбаска разрезается на 12 частей.</div>
+                    <div class="character-speech">
+                        <div class="character-name">ШЕФ ВИШЕНКА</div>
+                        <div class="dialogue">"Двенадцать кусочков — двенадцать будущих пирожков. Каждый — шедевр!" </div>
+                    </div>
+                </div>
+
+                <!-- Laugh Track -->
+                <div class="laugh-track" id="laugh4">
+                    <span class="laugh-emoji"> 🤣 😂 😆</span>
+                    ХА-ХА-ХА!
+                    <span class="laugh-emoji"> 🤣 😂 😆</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Episode Marker 4 -->
+        <div class="episode-marker" id="ep4">
+            <h2> ЭПИЗОД 4: НАЧИНКА </h2>
+            <p>Приготовление начинки (9:00 - 11:00)</p>
+        </div>
+
+        <!-- Scene 5: Filling -->
+        <div class="scene" id="scene5">
+            <div class="scene-header">
+                <span class="scene-number">СЦЕНА 5</span>
+                <span class="scene-time">09:00 - 11:00</span>
+            </div>
+            <div class="scene-title"> Приготовление начинки </div>
+            <div class="scene-content">
+                <!-- Visual -->
+                <div class="visual-scene" style="background: linear-gradient(180deg, #4a3728, #2d1b12)">
+                    <div class="food-items">
+                        <div class="food-item" style="top:20%;left:15%;animation-delay:0s"> </div>
+                        <div class="food-item" style="top:30%;right:15%;animation-delay:0.3s"> </div>
+                        <div class="food-item" style="top:50%;left:25%;animation-delay:0.6s"> </div>
+                        <div class="food-item" style="bottom:20%;right:25%;animation-delay:0.9s"> </div>
+                    </div>
+                    <div style="font-size:5em; z-index:10; position:relative"> </div>
+                </div>
+
+                <!-- Shot 5.1 -->
+                <div class="shot">
+                    <div class="shot-time">09:00 - 09:15</div>
+                    <div class="shot-desc">Шеф достаёт продукты из холодильника.</div>
+                    <div class="character-speech">
+                        <div class="character-name">ШЕФ ВИШЕНКА</div>
+                        <div class="dialogue">"Классическая начинка — мясной фарш с луком. Но можно всё что угодно!" </div>
+                    </div>
+                </div>
+
+                <!-- Shot 5.2 -->
+                <div class="shot">
+                    <div class="shot-time">09:15 - 09:30</div>
+                    <div class="shot-desc">Нарезка лука. Лук "плачет".</div>
+                    <div class="character-speech">
+                        <div class="character-name">ШЕФ ВИШЕНКА</div>
+                        <div class="dialogue">"Лук — душа начинки. Хоть и заставляет плакать."</div>
+                    </div>
+                    <div class="animation-desc"> [АНИМАЦИЯ] Лук "плачет" — маленькие слёзы] </div>
+                </div>
+
+                <!-- Shot 5.3 -->
+                <div class="shot">
+                    <div class="shot-time">09:30 - 09:45</div>
+                    <div class="shot-desc">Обжарка лука. Шшшш!</div>
+                    <div class="sound-desc"> [ЗВУК] Sizzling, oil crackling] </div>
+                </div>
+
+                <!-- Shot 5.4 -->
+                <div class="shot">
+                    <div class="shot-time">09:45 - 10:00</div>
+                    <div class="shot-desc">Добавление фарша. Перемешивание.</div>
+                    <div class="character-speech">
+                        <div class="character-name">ШЕФ ВИШЕНКА</div>
+                        <div class="dialogue">"Добавляем фарш и разбиваем комки."</div>
+                    </div>
+                </div>
+
+                <!-- Shot 5.5 -->
+                <div class="shot">
+                    <div class="shot-time">10:00 - 10:15</div>
+                    <div class="shot-desc">Соль, перец, зелень.</div>
+                    <div class="character-speech">
+                        <div class="character-name">ШЕФ ВИШЕНКА</div>
+                        <div class="dialogue">"Соль, перец, зелень. По вкусу. Не жалейте зелени!" </div>
+                    </div>
+                </div>
+
+                <!-- Shot 5.6 -->
+                <div class="shot">
+                    <div class="shot-time">10:15 - 10:30</div>
+                    <div class="shot-desc">Шеф пробует начинку. "Идеально!"</div>
+                    <div class="character-speech">
+                        <div class="character-name">ШЕФ ВИШЕНКА</div>
+                        <div class="dialogue">"Ммм! Идеально! Начинка — готова."</div>
+                    </div>
+                </div>
+
+                <!-- Shot 5.7-5.8 -->
+                <div class="shot">
+                    <div class="shot-time">10:30 - 11:00</div>
+                    <div class="shot-desc">Начинка остывает. Нельзя класть горячую!</div>
+                    <div class="character-speech">
+                        <div class="character-name">ШЕФ ВИШЕНКА</div>
+                        <div class="dialogue">"Горячую начинку нельзя класть в тесто — оно размокнет и порвётся!" </div>
+                    </div>
+                </div>
+
+                <!-- Laugh Track -->
+                <div class="laugh-track" id="laugh5">
+                    <span class="laugh-emoji"> 😂 🤣 😆</span>
+                    ХА-ХА-ХА!
+                    <span class="laugh-emoji"> 😂 🤣 😆</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Episode Marker 5 -->
+        <div class="episode-marker" id="ep5">
+            <h2> ЭПИЗОД 5: ЛЕПКА </h2>
+            <p>Формировка пирожков (11:00 - 13:00)</p>
+        </div>
+
+        <!-- Scene 6: Shaping -->
+        <div class="scene" id="scene6">
+            <div class="scene-header">
+                <span class="scene-number">СЦЕНА 6</span>
+                <span class="scene-time">11:00 - 13:00</span>
+            </div>
+            <div class="scene-title"> Лепка пирожков </div>
+            <div class="scene-content">
+                <!-- Visual -->
+                <div class="visual-scene" style="background: linear-gradient(180deg, #f5deb3, #deb887)">
+                    <div class="food-items">
+                        <div class="food-item" style="top:15%;left:10%"> </div>
+                        <div class="food-item" style="top:25%;right:10%"> </div>
+                        <div class="food-item" style="top:45%;left:20%"> </div>
+                        <div class="food-item" style="top:55%;right:20%"> </div>
+                        <div class="food-item" style="bottom:15%;left:30%"> </div>
+                        <div class="food-item" style="bottom:25%;right:30%"> </div>
+                    </div>
+                    <div style="font-size:5em; z-index:10; position:relative"> </div>
+                </div>
+
+                <!-- Shot 6.1 -->
+                <div class="shot">
+                    <div class="shot-time">11:00 - 11:15</div>
+                    <div class="shot-desc">Шеф берёт кусочек теста. Формирует шарик.</div>
+                    <div class="character-speech">
+                        <div class="character-name">ШЕФ ВИШЕНКА</div>
+                        <div class="dialogue">"Берём кусочек теста и начинаем раскатывать."</div>
+                    </div>
+                </div>
+
+                <!-- Shot 6.2 -->
+                <div class="shot">
+                    <div class="shot-time">11:15 - 11:30</div>
+                    <div class="shot-desc">Раскатка в лепёшку 10-12 см.</div>
+                    <div class="character-speech">
+                        <div class="character-name">ШЕФ ВИШЕНКА</div>
+                        <div class="dialogue">"Раскатываем от центра к краям. Не слишком тонко!" </div>
+                    </div>
+                </div>
+
+                <!-- Shot 6.3 -->
+                <div class="shot">
+                    <div class="shot-time">11:30 - 11:45</div>
+                    <div class="shot-desc">Столовая ложка начинки в центр.</div>
+                    <div class="character-speech">
+                        <div class="character-name">ШЕФ ВИШЕНКА</div>
+                        <div class="dialogue">"Столовая ложка начинки — ровно в центр."</div>
+                    </div>
+                </div>
+
+                <!-- Shot 6.4-6.5 -->
+                <div class="shot">
+                    <div class="shot-time">11:45 - 12:15</div>
+                    <div class="shot-desc">Защипывание краёв. Крупный план.</div>
+                    <div class="character-speech">
+                        <div class="character-name">ШЕФ ВИШЕНКА</div>
+                        <div class="dialogue">"Защипываем крепко, но аккуратно. Шов — это душа пирожка!" </div>
+                    </div>
+                    <div class="animation-desc"> [КРУПНЫЙ ПЛАН] Пальцы формируют защипы, пирожок — лодочка] </div>
+                </div>
+
+                <!-- Shot 6.6-6.7 -->
+                <div class="shot">
+                    <div class="shot-time">12:15 - 12:45</div>
+                    <div class="shot-desc">Готовый пирожок. Ставит на противень.</div>
+                    <div class="character-speech">
+                        <div class="character-name">ШЕФ ВИШЕНКА</div>
+                        <div class="dialogue">"Отлично! Этот — на противень. Осталось десять!" </div>
+                    </div>
+                </div>
+
+                <!-- Shot 6.8 -->
+                <div class="shot">
+                    <div class="shot-time">12:45 - 13:00</div>
+                    <div class="shot-desc">Монтаж: 12 пирожков на противне.</div>
+                    <div class="character-speech">
+                        <div class="character-name">ШЕФ ВИШЕНКА</div>
+                        <div class="dialogue">"Двенадцать пирожков — двенадцать побед! Готовы к выпечке!" </div>
+                    </div>
+                </div>
+
+                <!-- Laugh Track -->
+                <div class="laugh-track" id="laugh6">
+                    <span class="laugh-emoji"> 🤣 😂 😆</span>
+                    ХА-ХА-ХА!
+                    <span class="laugh-emoji"> 🤣 😂 😆</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Episode Marker 6 -->
+        <div class="episode-marker" id="ep6">
+            <h2> ЭПИЗОД 6: ВЫПЕЧКА </h2>
+            <p>Духовка (13:00 - 14:30)</p>
+        </div>
+
+        <!-- Scene 7: Baking -->
+        <div class="scene" id="scene7">
+            <div class="scene-header">
+                <span class="scene-number">СЦЕНА 7</span>
+                <span class="scene-time">13:00 - 14:30</span>
+            </div>
+            <div class="scene-title"> Выпечка </div>
+            <div class="scene-content">
+                <!-- Visual -->
+                <div class="visual-scene oven-glow" style="background: linear-gradient(180deg, #8b0000, #4a0000)">
+                    <div class="steam" style="top:10%;left:30%"> </div>
+                    <div class="steam" style="top:15%;left:50%;animation-delay:0.5s"> </div>
+                    <div class="steam" style="top:20%;left:70%;animation-delay:1s"> </div>
+                    <div style="font-size:6em; z-index:10; position:relative"> </div>
+                </div>
+
+                <!-- Shot 7.1 -->
+                <div class="shot">
+                    <div class="shot-time">13:00 - 13:10</div>
+                    <div class="shot-desc">Разогрев духовки до 180°C.</div>
+                    <div class="character-speech">
+                        <div class="character-name">ШЕФ ВИШЕНКА</div>
+                        <div class="dialogue">"Разогреваем духовку до ста восьмидесяти градусов."</div>
+                    </div>
+                </div>
+
+                <!-- Shot 7.2 -->
+                <div class="shot">
+                    <div class="shot-time">13:10 - 13:20</div>
+                    <div class="shot-desc">Смазка яйцом. Пирожки блестят.</div>
+                    <div class="character-speech">
+                        <div class="character-name">ШЕФ ВИШЕНКА</div>
+                        <div class="dialogue">"Смазываем яйцом — будет золотистая корочка!" </div>
+                    </div>
+                </div>
+
+                <!-- Shot 7.3 -->
+                <div class="shot">
+                    <div class="shot-time">13:20 - 13:30</div>
+                    <div class="shot-desc">Противень в духовку. Дверца закрывается.</div>
+                    <div class="character-speech">
+                        <div class="character-name">ШЕФ ВИШЕНКА</div>
+                        <div class="dialogue">"В духовку! Двадцать пять-тридцать минут. Не открываем!" </div>
+                    </div>
+                </div>
+
+                <!-- Shot 7.4-7.5 -->
+                <div class="shot">
+                    <div class="shot-time">13:30 - 13:50</div>
+                    <div class="shot-desc">Таймер ускоряется. Пирожки поднимаются и золотятся.</div>
+                    <div class="animation-desc"> [ТАЙМЕР] 13:30 → 14:00 (×20)] </div>
+                    <div class="animation-desc"> [АНИМАЦИЯ] Пирожки растут, корочка золотится] </div>
+                </div>
+
+                <!-- Shot 7.6 -->
+                <div class="shot">
+                    <div class="shot-time">13:50 - 14:00</div>
+                    <div class="shot-desc">Духовка открывается! Облака аромата!</div>
+                    <div class="character-speech">
+                        <div class="character-name">ШЕФ ВИШЕНКА</div>
+                        <div class="dialogue">"Ааааа! Запах! Это просто волшебство!" </div>
+                    </div>
+                    <div class="animation-desc"> [АНИМАЦИЯ] Облака аромата формируют сердечко] </div>
+                </div>
+
+                <!-- Shot 7.7-7.8 -->
+                <div class="shot">
+                    <div class="shot-time">14:00 - 14:30</div>
+                    <div class="shot-desc">Пирожки на решётке. Пружинят при нажатии.</div>
+                    <div class="character-speech">
+                        <div class="character-name">ШЕФ ВИШЕНКА</div>
+                        <div class="dialogue">"Хрустящая корочка, мягкое тесто — идеально!" </div>
+                    </div>
+                </div>
+
+                <!-- Laugh Track -->
+                <div class="laugh-track" id="laugh7">
+                    <span class="laugh-emoji"> 😂 🤣 😆</span>
+                    ХА-ХА-ХА!
+                    <span class="laugh-emoji"> 😂 🤣 😆</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Episode Marker 7 -->
+        <div class="episode-marker" id="ep7">
+            <h2> ФИНАЛ </h2>
+            <p>Дегустация (14:30 - 15:00)</p>
+        </div>
+
+        <!-- Scene 8: Finale -->
+        <div class="scene" id="scene8">
+            <div class="scene-header">
+                <span class="scene-number">СЦЕНА 8</span>
+                <span class="scene-time">14:30 - 15:00</span>
+            </div>
+            <div class="scene-title"> Дегустация </div>
+            <div class="scene-content">
+                <!-- Visual -->
+                <div class="visual-scene" style="background: linear-gradient(180deg, #ffd700, #ff8c00)">
+                    <div class="food-items">
+                        <div class="pirozhok" style="animation-delay:0s"> </div>
+                        <div class="pirozhok" style="animation-delay:0.2s"> </div>
+                        <div class="pirozhok" style="animation-delay:0.4s"> </div>
+                        <div class="pirozhok" style="animation-delay:0.6s"> </div>
+                        <div class="pirozhok" style="animation-delay:0.8s"> </div>
+                        <div class="pirozhok" style="animation-delay:1.0s"> </div>
+                    </div>
+                    <div style="font-size:7em; z-index:10; position:relative"> </div>
+                </div>
+
+                <!-- Shot 8.1 -->
+                <div class="shot">
+                    <div class="shot-time">14:30 - 14:40</div>
+                    <div class="shot-desc">Разрез пирожка пополам. Пар!</div>
+                    <div class="character-speech">
+                        <div class="character-name">ШЕФ ВИШЕНКА</div>
+                        <div class="dialogue">"А теперь — самый важный момент. Разрезаем!" </div>
+                    </div>
+                    <div class="animation-desc"> [КРУПНЫЙ ПЛАН] Нож, хруст корочки, пар, начинка] </div>
+                </div>
+
+                <!-- Shot 8.2 -->
+                <div class="shot">
+                    <div class="shot-time">14:40 - 14:45</div>
+                    <div class="shot-desc">Внутренность пирожка. Идеальная структура.</div>
+                    <div class="character-speech">
+                        <div class="character-name">ДИКТОР</div>
+                        <div class="dialogue">"Хрустящая корочка. Мягкое, воздушное тесто. Сочная начинка. Идеальный пирожок."</div>
+                    </div>
+                </div>
+
+                <!-- Shot 8.3 -->
+                <div class="shot">
+                    <div class="shot-time">14:45 - 14:50</div>
+                    <div class="shot-desc">Шеф откусывает. Закрывает глаза.</div>
+                    <div class="character-speech">
+                        <div class="character-name">ШЕФ ВИШЕНКА</div>
+                        <div class="dialogue">"Ммммм! Это... это лучшие пирожки в моей жизни!" </div>
+                    </div>
+                </div>
+
+                <!-- Shot 8.4-8.5 -->
+                <div class="shot">
+                    <div class="shot-time">14:50 - 15:00</div>
+                    <div class="shot-desc">Титры. Список ингредиентов. Шеф машет.</div>
+                    <div class="character-speech">
+                        <div class="character-name">ШЕФ ВИШЕНКА</div>
+                        <div class="dialogue">"Приятного аппетита, друзья! Запомним: покупное тесто — это не приговор!" </div>
+                    </div>
+                    <div class="character-speech">
+                        <div class="character-name">ДИКТОР</div>
+                        <div class="dialogue">"Конец. Рецепт и тайминг — в описании."</div>
+                    </div>
+                </div>
+
+                <!-- Final Laugh Track -->
+                <div class="laugh-track" id="laugh8">
+                    <span class="laugh-emoji"> 😂 🤣 😆 🎉</span>
+                    ХА-ХА-ХА! КОНЕЦ!
+                    <span class="laugh-emoji"> 🎉 😂 🤣 😆</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Finale Screen -->
+        <div class="finale">
+            <h1> КОНЕЦ </h1>
+            <p style="font-size:1.3em; margin-bottom:30px">Приятного аппетита!</p>
+
+            <div class="recipe-card">
+                <h3> Ингредиенты </h3>
+                <ul>
+                    <li>Мука — 500 г</li>
+                    <li>Сухие дрожжи — 10 г</li>
+                    <li>Тёплая вода — 250 мл</li>
+                    <li>Сахар — 1 ст.л.</li>
+                    <li>Соль — 1 ч.л.</li>
+                    <li>Растительное масло — 2 ст.л.</li>
+                    <li>Фарш — 300 г</li>
+                    <li>Лук — 2 шт.</li>
+                    <li>Яйцо — 1 шт.</li>
+                    <li>Зелень, соль, перец — по вкусу</li>
+                </ul>
+            </div>
+
+            <div class="recipe-card">
+                <h3> Тайминг </h3>
+                <ul>
+                    <li>00:00 - 01:30 — Пролог</li>
+                    <li>01:30 - 04:00 — Пробуждение дрожжей</li>
+                    <li>04:00 - 07:00 — Смешение и замес</li>
+                    <li>07:00 - 09:00 — Настаивание теста</li>
+                    <li>09:00 - 11:00 — Приготовление начинки</li>
+                    <li>11:00 - 13:00 — Формировка пирожков</li>
+                    <li>13:00 - 14:30 — Выпечка</li>
+                    <li>14:30 - 15:00 — Дегустация</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Laugh Visual Overlay -->
+    <div class="laugh-visual" id="laughOverlay">
+        <div class="laugh-content">
+            <span class="big-emoji">😂</span>
+            <div class="laugh-text">ХА-ХА-ХА!</div>
+        </div>
+    </div>
+
+    <!-- Audio for Laugh Track (using Web Audio API) -->
+    <script>
+        // Audio Context for laugh sounds
+        let audioCtx = null;
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        function playLaughSound() {
+            initAudio();
+            // Create a simple laugh-like sound effect
+            const oscillator = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+
+            oscillator.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+
+            oscillator.frequency.setValueAtTime(800, audioCtx.currentTime);
+            oscillator.frequency.exponentialRampToValueAtTime(400, audioCtx.currentTime + 0.1);
+            oscillator.frequency.exponentialRampToValueAtTime(600, audioCtx.currentTime + 0.2);
+            oscillator.frequency.exponentialRampToValueAtTime(300, audioCtx.currentTime + 0.3);
+
+            gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
+
+            oscillator.start(audioCtx.currentTime);
+            oscillator.stop(audioCtx.currentTime + 0.4);
+        }
+
+        function playBubbleSound() {
+            initAudio();
+            const oscillator = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+
+            oscillator.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+
+            oscillator.type = 'sine';
+            oscillator.frequency.setValueAtTime(200 + Math.random() * 200, audioCtx.currentTime);
+            oscillator.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.1);
+
+            gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.15);
+
+            oscillator.start(audioCtx.currentTime);
+            oscillator.stop(audioCtx.currentTime + 0.15);
+        }
+
+        function playTimerSound() {
+            initAudio();
+            const oscillator = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+
+            oscillator.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+
+            oscillator.type = 'square';
+            oscillator.frequency.setValueAtTime(1000, audioCtx.currentTime);
+
+            gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+
+            oscillator.start(audioCtx.currentTime);
+            oscillator.stop(audioCtx.currentTime + 0.1);
+        }
+
+        function playSizzleSound() {
+            initAudio();
+            const bufferSize = audioCtx.sampleRate * 0.5;
+            const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+            const data = buffer.getChannelData(0);
+
+            for (let i = 0; i < bufferSize; i++) {
+                data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (bufferSize * 0.3));
+            }
+
+            const source = audioCtx.createBufferSource();
+            source.buffer = buffer;
+
+            const filter = audioCtx.createBiquadFilter();
+            filter.type = 'highpass';
+            filter.frequency.value = 3000;
+
+            const gainNode = audioCtx.createGain();
+            gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
+
+            source.connect(filter);
+            filter.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+
+            source.start();
+        }
+
+        function playCrunchSound() {
+            initAudio();
+            const bufferSize = audioCtx.sampleRate * 0.2;
+            const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+            const data = buffer.getChannelData(0);
+
+            for (let i = 0; i < bufferSize; i++) {
+                data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (bufferSize * 0.1));
+            }
+
+            const source = audioCtx.createBufferSource();
+            source.buffer = buffer;
+
+            const gainNode = audioCtx.createGain();
+            gainNode.gain.setValueAtTime(0.2, audioCtx.currentTime);
+
+            source.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+
+            source.start();
+        }
+
+        // Movie State
+        let isPlaying = false;
+        let currentScene = 0;
+        let currentTime = 0;
+        let playSpeed = 1;
+        let timerInterval = null;
+        let sceneTimeout = null;
+
+        const totalDuration = 900; // 15 minutes in seconds
+        const scenes = [
+            { id: 'scene1', start: 0, end: 90, laugh: 'laugh1' },
+            { id: 'scene2', start: 90, end: 240, laugh: 'laugh2' },
+            { id: 'scene3', start: 240, end: 420, laugh: 'laugh3' },
+            { id: 'scene4', start: 420, end: 540, laugh: 'laugh4' },
+            { id: 'scene5', start: 540, end: 660, laugh: 'laugh5' },
+            { id: 'scene6', start: 660, end: 780, laugh: 'laugh6' },
+            { id: 'scene7', start: 780, end: 870, laugh: 'laugh7' },
+            { id: 'scene8', start: 870, end: 900, laugh: 'laugh8' }
+        ];
+
+        const episodes = [
+            { id: 'ep0', time: 0 },
+            { id: 'ep1', time: 90 },
+            { id: 'ep2', time: 240 },
+            { id: 'ep3', time: 420 },
+            { id: 'ep4', time: 540 },
+            { id: 'ep5', time: 660 },
+            { id: 'ep6', time: 780 },
+            { id: 'ep7', time: 870 }
+        ];
+
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+        }
+
+        function updateTimer() {
+            document.getElementById('mainTimer').textContent = formatTime(currentTime);
+
+            const progress = (currentTime / totalDuration) * 100;
+            document.getElementById('progressFill').style.width = progress + '%';
+
+            // Update active scene
+            scenes.forEach(scene => {
+                const sceneEl = document.getElementById(scene.id);
+                if (currentTime >= scene.start && currentTime < scene.end) {
+                    sceneEl.classList.add('active');
+                } else {
+                    sceneEl.classList.remove('active');
+                }
+            });
+
+            // Update episode markers
+            episodes.forEach(ep => {
+                const epEl = document.getElementById(ep.id);
+                if (currentTime >= ep.time && currentTime < ep.time + 10) {
+                    epEl.classList.add('show');
+                } else if (currentTime >= ep.time + 10) {
+                    epEl.classList.remove('show');
+                }
+            });
+
+            // Check for scene end - trigger laugh
+            scenes.forEach(scene => {
+                if (currentTime === scene.end - 1) {
+                    triggerLaugh(scene.laugh);
+                }
+            });
+
+            // Check for fast-forward moments
+            if (currentTime === 180 || currentTime === 330 || currentTime === 450 ||
+                currentTime === 570 || currentTime === 690 || currentTime === 810) {
+                document.getElementById('mainTimer').classList.add('timer-fast');
+                playTimerSound();
+                setTimeout(() => {
+                    document.getElementById('mainTimer').classList.remove('timer-fast');
+                }, 2000);
+            }
+
+            // Play specific sounds
+            if (currentTime === 120) playBubbleSound();
+            if (currentTime === 150) playBubbleSound();
+            if (currentTime === 570) playSizzleSound();
+            if (currentTime === 870) playCrunchSound();
+        }
+
+        function triggerLaugh(laughId) {
+            const laughEl = document.getElementById(laughId);
+            laughEl.classList.add('show');
+            playLaughSound();
+
+            // Show overlay
+            const overlay = document.getElementById('laughOverlay');
+            overlay.classList.add('show');
+
+            setTimeout(() => {
+                laughEl.classList.remove('show');
+                overlay.classList.remove('show');
+            }, 3000);
+        }
+
+        function playMovie() {
+            if (isPlaying) return;
+            isPlaying = true;
+
+            initAudio();
+
+            timerInterval = setInterval(() => {
+                if (currentTime < totalDuration) {
+                    currentTime++;
+                    updateTimer();
+                } else {
+                    pauseMovie();
+                }
+            }, 1000 / playSpeed);
+        }
+
+        function pauseMovie() {
+            isPlaying = false;
+            clearInterval(timerInterval);
+        }
+
+        function resetMovie() {
+            pauseMovie();
+            currentTime = 0;
+            updateTimer();
+
+            scenes.forEach(scene => {
+                document.getElementById(scene.id).classList.remove('active');
+            });
+
+            episodes.forEach(ep => {
+                document.getElementById(ep.id).classList.remove('show');
+            });
+
+            document.querySelectorAll('.laugh-track').forEach(el => {
+                el.classList.remove('show');
+            });
+        }
+
+        function changeSpeed() {
+            const speeds = [1, 2, 4, 8, 0.5];
+            const currentIndex = speeds.indexOf(playSpeed);
+            playSpeed = speeds[(currentIndex + 1) % speeds.length];
+            document.getElementById('speedValue').textContent = playSpeed + 'x';
+
+            if (isPlaying) {
+                pauseMovie();
+                playMovie();
+            }
+        }
+
+        // Generate bubbles for scene 2
+        function generateBubbles() {
+            const container = document.getElementById('bubbles1');
+            for (let i = 0; i < 20; i++) {
+                const bubble = document.createElement('div');
+                bubble.className = 'bubble';
+                bubble.style.left = Math.random() * 100 + '%';
+                bubble.style.width = (Math.random() * 20 + 10) + 'px';
+                bubble.style.height = bubble.style.width;
+                bubble.style.animationDelay = Math.random() * 2 + 's';
+                bubble.style.animationDuration = (Math.random() * 2 + 1) + 's';
+                container.appendChild(bubble);
+            }
+        }
+
+        // Initialize
+        generateBubbles();
+        updateTimer();
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            switch(e.code) {
+                case 'Space':
+                    e.preventDefault();
+                    isPlaying ? pauseMovie() : playMovie();
+                    break;
+                case 'ArrowRight':
+                    currentTime = Math.min(currentTime + 10, totalDuration);
+                    updateTimer();
+                    break;
+                case 'ArrowLeft':
+                    currentTime = Math.max(currentTime - 10, 0);
+                    updateTimer();
+                    break;
+                case 'KeyR':
+                    resetMovie();
+                    break;
+                case 'KeyS':
+                    changeSpeed();
+                    break;
+            }
+        });
+    </script>
+</body>
+</html>
