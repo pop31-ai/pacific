@@ -1,1660 +1,916 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Пирожки с нуля: Тесто Времени</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            background: #1a1a2e;
-            color: #fff;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            overflow-x: hidden;
-        }
-
-        .movie-container {
-            max-width: 900px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-
-        .title-screen {
-            text-align: center;
-            padding: 80px 20px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-radius: 20px;
-            margin-bottom: 30px;
-            animation: glow 2s ease-in-out infinite alternate;
-        }
-
-        @keyframes glow {
-            from { box-shadow: 0 0 20px #667eea; }
-            to { box-shadow: 0 0 40px #764ba2; }
-        }
-
-        .title-screen h1 {
-            font-size: 2.8em;
-            margin-bottom: 10px;
-            text-shadow: 3px 3px 6px rgba(0,0,0,0.5);
-        }
-
-        .title-screen .subtitle {
-            font-size: 1.3em;
-            opacity: 0.9;
-            margin-bottom: 30px;
-        }
-
-        .timer-display {
-            font-size: 2em;
-            font-family: 'Courier New', monospace;
-            background: #000;
-            padding: 15px 30px;
-            border-radius: 10px;
-            display: inline-block;
-            border: 3px solid #0f0;
-            color: #0f0;
-            text-shadow: 0 0 10px #0f0;
-        }
-
-        .controls {
-            text-align: center;
-            margin: 30px 0;
-            position: sticky;
-            top: 10px;
-            z-index: 100;
-            background: rgba(26, 26, 46, 0.95);
-            padding: 15px;
-            border-radius: 15px;
-            border: 2px solid #667eea;
-        }
-
-        .controls button {
-            padding: 12px 30px;
-            font-size: 1.1em;
-            margin: 0 10px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.3s;
-            font-weight: bold;
-        }
-
-        .btn-play { background: #4CAF50; color: white; }
-        .btn-pause { background: #ff9800; color: white; }
-        .btn-reset { background: #f44336; color: white; }
-        .btn-speed { background: #9c27b0; color: white; }
-
-        .controls button:hover {
-            transform: scale(1.05);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-        }
-
-        .controls button:active {
-            transform: scale(0.95);
-        }
-
-        .speed-display {
-            display: inline-block;
-            margin-left: 15px;
-            font-size: 0.9em;
-            color: #aaa;
-        }
-
-        .scene {
-            background: #16213e;
-            border-radius: 15px;
-            margin: 25px 0;
-            overflow: hidden;
-            border: 2px solid #0f3460;
-            opacity: 0.5;
-            transform: scale(0.98);
-            transition: all 0.5s;
-        }
-
-        .scene.active {
-            opacity: 1;
-            transform: scale(1);
-            border-color: #667eea;
-            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
-        }
-
-        .scene-header {
-            background: linear-gradient(90deg, #0f3460, #533483);
-            padding: 15px 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .scene-number {
-            background: #e94560;
-            padding: 5px 15px;
-            border-radius: 20px;
-            font-weight: bold;
-            font-size: 0.9em;
-        }
-
-        .scene-time {
-            font-family: 'Courier New', monospace;
-            color: #0f0;
-            font-size: 1.1em;
-        }
-
-        .scene-title {
-            padding: 15px 20px;
-            font-size: 1.4em;
-            font-weight: bold;
-            background: rgba(0,0,0,0.2);
-        }
-
-        .scene-content {
-            padding: 20px;
-        }
-
-        .shot {
-            background: rgba(255,255,255,0.05);
-            border-left: 4px solid #667eea;
-            padding: 15px;
-            margin: 15px 0;
-            border-radius: 0 10px 10px 0;
-            opacity: 0;
-            transform: translateX(-20px);
-            transition: all 0.5s;
-        }
-
-        .scene.active .shot {
-            opacity: 1;
-            transform: translateX(0);
-        }
-
-        .shot-time {
-            font-family: 'Courier New', monospace;
-            color: #0f0;
-            font-size: 0.85em;
-            margin-bottom: 8px;
-        }
-
-        .shot-desc {
-            color: #ccc;
-            margin-bottom: 10px;
-            line-height: 1.5;
-        }
-
-        .character-speech {
-            background: rgba(102, 126, 234, 0.2);
-            border-radius: 10px;
-            padding: 12px 15px;
-            margin: 10px 0;
-            border-left: 3px solid #667eea;
-        }
-
-        .character-name {
-            color: #e94560;
-            font-weight: bold;
-            margin-bottom: 5px;
-        }
-
-        .dialogue {
-            color: #fff;
-            font-style: italic;
-        }
-
-        .animation-desc {
-            color: #ffd700;
-            font-size: 0.9em;
-            margin: 8px 0;
-            padding: 8px;
-            background: rgba(255, 215, 0, 0.1);
-            border-radius: 5px;
-        }
-
-        .sound-desc {
-            color: #87ceeb;
-            font-size: 0.85em;
-        }
-
-        .laugh-track {
-            background: linear-gradient(90deg, #ff6b6b, #feca57);
-            color: #000;
-            text-align: center;
-            padding: 20px;
-            font-size: 1.5em;
-            font-weight: bold;
-            border-radius: 10px;
-            margin-top: 20px;
-            opacity: 0;
-            transform: scale(0.8);
-            transition: all 0.5s;
-        }
-
-        .laugh-track.show {
-            opacity: 1;
-            transform: scale(1);
-            animation: laughBounce 0.5s ease;
-        }
-
-        @keyframes laughBounce {
-            0%, 100% { transform: scale(1); }
-            25% { transform: scale(1.1); }
-            50% { transform: scale(0.95); }
-            75% { transform: scale(1.05); }
-        }
-
-        .laugh-emoji {
-            font-size: 2em;
-            display: block;
-            margin-bottom: 10px;
-        }
-
-        .progress-bar {
-            width: 100%;
-            height: 8px;
-            background: #333;
-            border-radius: 4px;
-            margin: 15px 0;
-            overflow: hidden;
-        }
-
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #667eea, #764ba2);
-            width: 0%;
-            transition: width 0.3s;
-            border-radius: 4px;
-        }
-
-        .episode-marker {
-            background: #0f3460;
-            padding: 20px;
-            text-align: center;
-            margin: 30px 0 15px 0;
-            border-radius: 10px;
-            border: 2px dashed #667eea;
-            opacity: 0;
-            transition: all 0.5s;
-        }
-
-        .episode-marker.show {
-            opacity: 1;
-        }
-
-        .episode-marker h2 {
-            color: #e94560;
-            font-size: 1.8em;
-            margin-bottom: 5px;
-        }
-
-        .episode-marker p {
-            color: #aaa;
-        }
-
-        .finale {
-            text-align: center;
-            padding: 60px 20px;
-            background: linear-gradient(135deg, #e94560 0%, #533483 100%);
-            border-radius: 20px;
-            margin-top: 30px;
-        }
-
-        .finale h1 {
-            font-size: 2.5em;
-            margin-bottom: 20px;
-        }
-
-        .recipe-card {
-            background: rgba(255,255,255,0.1);
-            border-radius: 15px;
-            padding: 30px;
-            margin: 20px 0;
-            text-align: left;
-        }
-
-        .recipe-card h3 {
-            color: #ffd700;
-            margin-bottom: 15px;
-            font-size: 1.3em;
-        }
-
-        .recipe-card ul {
-            list-style: none;
-            padding: 0;
-        }
-
-        .recipe-card li {
-            padding: 8px 0;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-        }
-
-        .recipe-card li::before {
-            content: "✓ ";
-            color: #4CAF50;
-        }
-
-        .visual-scene {
-            background: #000;
-            border-radius: 15px;
-            padding: 40px;
-            margin: 20px 0;
-            text-align: center;
-            min-height: 300px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .kitchen-bg {
-            background: linear-gradient(180deg, #87ceeb 0%, #87ceeb 60%, #8b4513 60%, #8b4513 100%);
-        }
-
-        .chef {
-            font-size: 8em;
-            animation: chefBounce 1s ease-in-out infinite;
-            position: relative;
-            z-index: 10;
-        }
-
-        @keyframes chefBounce {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-20px); }
-        }
-
-        .food-items {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            top: 0;
-            left: 0;
-        }
-
-        .food-item {
-            position: absolute;
-            font-size: 3em;
-            animation: float 3s ease-in-out infinite;
-        }
-
-        @keyframes float {
-            0%, 100% { transform: translateY(0) rotate(0deg); }
-            50% { transform: translateY(-30px) rotate(10deg); }
-        }
-
-        .bubbles {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-        }
-
-        .bubble {
-            position: absolute;
-            background: rgba(255,255,255,0.3);
-            border-radius: 50%;
-            animation: rise 2s ease-in infinite;
-        }
-
-        @keyframes rise {
-            0% { transform: translateY(100%) scale(0); opacity: 1; }
-            100% { transform: translateY(-100%) scale(1); opacity: 0; }
-        }
-
-        .steam {
-            position: absolute;
-            font-size: 2em;
-            animation: steamRise 2s ease-out infinite;
-            opacity: 0.6;
-        }
-
-        @keyframes steamRise {
-            0% { transform: translateY(0) scale(1); opacity: 0.6; }
-            100% { transform: translateY(-100px) scale(2); opacity: 0; }
-        }
-
-        .timer-fast {
-            animation: timerPulse 0.5s ease-in-out infinite;
-        }
-
-        @keyframes timerPulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.1); color: #ff0; }
-        }
-
-        .oven-glow {
-            animation: ovenGlow 1s ease-in-out infinite alternate;
-        }
-
-        @keyframes ovenGlow {
-            from { box-shadow: inset 0 0 30px rgba(255,100,0,0.5); }
-            to { box-shadow: inset 0 0 60px rgba(255,100,0,0.8); }
-        }
-
-        .pirozhok {
-            font-size: 4em;
-            display: inline-block;
-            margin: 10px;
-            animation: pirozhokPop 0.5s ease-out;
-        }
-
-        @keyframes pirozhokPop {
-            0% { transform: scale(0) rotate(-180deg); }
-            100% { transform: scale(1) rotate(0deg); }
-        }
-
-        .aroma-clouds {
-            position: absolute;
-            font-size: 3em;
-            animation: aromaFloat 3s ease-in-out infinite;
-        }
-
-        @keyframes aromaFloat {
-            0%, 100% { transform: translateY(0) translateX(0); opacity: 0.7; }
-            50% { transform: translateY(-50px) translateX(20px); opacity: 1; }
-        }
-
-        .sound-wave {
-            display: inline-block;
-            width: 4px;
-            height: 20px;
-            background: #fff;
-            margin: 0 2px;
-            animation: soundWave 0.5s ease-in-out infinite;
-        }
-
-        @keyframes soundWave {
-            0%, 100% { height: 10px; }
-            50% { height: 30px; }
-        }
-
-        .laugh-visual {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.8);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-        }
-
-        .laugh-visual.show {
-            display: flex;
-        }
-
-        .laugh-content {
-            text-align: center;
-            animation: laughZoom 0.5s ease;
-        }
-
-        @keyframes laughZoom {
-            0% { transform: scale(0); }
-            50% { transform: scale(1.2); }
-            100% { transform: scale(1); }
-        }
-
-        .laugh-content .big-emoji {
-            font-size: 8em;
-            display: block;
-            margin-bottom: 20px;
-        }
-
-        .laugh-text {
-            font-size: 2em;
-            color: #ffd700;
-            font-weight: bold;
-        }
-
-        @media (max-width: 768px) {
-            .title-screen h1 { font-size: 1.8em; }
-            .controls button { padding: 10px 15px; font-size: 0.9em; }
-            .chef { font-size: 5em; }
-            .timer-display { font-size: 1.5em; padding: 10px 20px; }
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Пирожки с нуля: Тесто Времени</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0d0d1a;color:#fff;font-family:'Segoe UI',sans-serif;overflow-x:hidden}
+.wrap{max-width:960px;margin:0 auto;padding:16px}
+.hdr{text-align:center;padding:40px 20px 30px;background:linear-gradient(135deg,#667eea 0%,#764ba2 50%,#e94560 100%);border-radius:20px;margin-bottom:16px;position:relative;overflow:hidden}
+.hdr::before{content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:radial-gradient(circle,rgba(255,255,255,.08) 1px,transparent 1px);background-size:30px 30px;animation:stars 20s linear infinite}
+@keyframes stars{from{transform:translate(0,0)}to{transform:translate(30px,30px)}}
+.hdr h1{font-size:2.4em;position:relative;text-shadow:2px 2px 8px rgba(0,0,0,.4)}
+.hdr .sub{font-size:1.1em;opacity:.85;margin:8px 0 20px;position:relative}
+#clock{font-size:2em;font-family:'Courier New',monospace;background:rgba(0,0,0,.6);padding:10px 24px;border-radius:10px;display:inline-block;border:2px solid #0f0;color:#0f0;text-shadow:0 0 8px #0f0;position:relative}
+.ctrls{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:8px;margin:12px 0;position:sticky;top:4px;z-index:100;background:rgba(13,13,26,.95);padding:10px 16px;border-radius:14px;border:1px solid rgba(102,126,234,.4);backdrop-filter:blur(8px)}
+.ctrls button{padding:8px 18px;font-size:.9em;border:none;border-radius:8px;cursor:pointer;font-weight:600;transition:all .2s;color:#fff}
+.ctrls button:hover{transform:scale(1.06);filter:brightness(1.15)}
+.ctrls button:active{transform:scale(.94)}
+.bg{background:#4CAF50}.bp{background:#ff9800}.br{background:#f44336}.bs{background:#9c27b0}.bi{background:#2196f3}
+.spd{color:#888;font-size:.85em;margin-left:6px}
+.pbar{width:100%;height:6px;background:#222;border-radius:3px;overflow:hidden;flex-basis:100%}
+.pfill{height:100%;background:linear-gradient(90deg,#667eea,#e94560);width:0%;transition:width .25s}
+.epi{text-align:center;padding:16px;background:linear-gradient(135deg,#0f3460,#1a1a3e);border-radius:12px;border:1px dashed #667eea;margin:16px 0;display:none;animation:fadeIn .4s}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.epi h2{color:#e94560;font-size:1.4em}.epi p{color:#aaa;font-size:.9em;margin-top:4px}
+.scene{background:#111;border-radius:14px;margin:16px 0;overflow:hidden;border:1px solid #222;display:none;animation:fadeIn .5s}
+.scene.on{display:block}
+.shdr{background:linear-gradient(90deg,#0f3460,#533483);padding:10px 16px;display:flex;justify-content:space-between;align-items:center}
+.snum{background:#e94560;padding:3px 12px;border-radius:16px;font-weight:700;font-size:.8em}
+.stm{font-family:'Courier New',monospace;color:#0f0;font-size:.95em}
+.stitle{padding:10px 16px;font-size:1.15em;font-weight:700;background:rgba(0,0,0,.25)}
+.scont{padding:14px}
+.visual{border-radius:10px;margin:10px 0;position:relative;overflow:hidden;background:#000;line-height:0}
+.visual canvas{width:100%;display:block;border-radius:10px}
+.dia{background:rgba(102,126,234,.15);border-radius:8px;padding:8px 12px;margin:6px 0;border-left:3px solid #667eea}
+.dn{color:#e94560;font-weight:700;font-size:.85em;margin-bottom:3px}
+.dt{color:#eee;font-style:italic;font-size:.9em}
+.shot{background:rgba(255,255,255,.03);border-left:3px solid #667eea;padding:10px;margin:8px 0;border-radius:0 8px 8px 0;animation:slideIn .35s ease}
+@keyframes slideIn{from{opacity:0;transform:translateX(-15px)}to{opacity:1;transform:translateX(0)}}
+.st{font-family:'Courier New',monospace;color:#0f0;font-size:.75em;margin-bottom:4px}
+.sd{color:#bbb;font-size:.9em;margin-bottom:4px}
+.an{color:#ffd700;font-size:.8em;padding:5px;background:rgba(255,215,0,.08);border-radius:4px;margin:3px 0}
+.laugh{background:linear-gradient(135deg,#ff6b6b,#feca57);color:#000;text-align:center;padding:14px;font-size:1.3em;font-weight:700;border-radius:10px;margin-top:12px;display:none}
+.laugh.on{display:block;animation:lp .5s ease}
+@keyframes lp{0%{transform:scale(0)}60%{transform:scale(1.1)}100%{transform:scale(1)}}
+.lov{position:fixed;inset:0;background:rgba(0,0,0,.88);display:none;align-items:center;justify-content:center;z-index:999}
+.lov.on{display:flex}
+.lov .big{font-size:6em;animation:lovPop .6s ease}
+@keyframes lovPop{0%{transform:scale(0) rotate(-20deg)}60%{transform:scale(1.2) rotate(5deg)}100%{transform:scale(1) rotate(0)}}
+.lov .ltxt{font-size:1.8em;color:#ffd700;font-weight:700;margin-top:10px;text-shadow:0 0 20px rgba(255,215,0,.5)}
+.fin{text-align:center;padding:40px 20px;background:linear-gradient(135deg,#e94560,#533483);border-radius:18px;margin-top:24px;display:none}
+.fin h1{font-size:2em;margin-bottom:12px}
+.rcard{background:rgba(255,255,255,.08);border-radius:10px;padding:16px;margin:12px 0;text-align:left}
+.rcard h3{color:#ffd700;margin-bottom:8px;font-size:1.05em}
+.rcard li{list-style:none;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.06);font-size:.9em}
+.rcard li::before{content:"✓ ";color:#4CAF50;font-weight:700}
+#intro{position:fixed;inset:0;background:rgba(10,10,20,.95);display:flex;align-items:center;justify-content:center;z-index:998;flex-direction:column;text-align:center}
+#intro h1{font-size:2.8em;margin-bottom:8px;background:linear-gradient(90deg,#667eea,#e94560);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+#intro p{color:#888;margin-bottom:20px;font-size:1em}
+#intro canvas{margin-bottom:15px;border-radius:16px;border:2px solid #333}
+#intro .bigbtn{padding:16px 50px;font-size:1.3em;border:none;border-radius:14px;cursor:pointer;background:linear-gradient(135deg,#4CAF50,#2e7d32);color:#fff;font-weight:700;transition:all .3s;box-shadow:0 4px 20px rgba(76,175,80,.3)}
+#intro .bigbtn:hover{transform:scale(1.08);box-shadow:0 6px 30px rgba(76,175,80,.5)}
+#intro .hint{margin-top:16px;color:#555;font-size:.8em}
+.dir-panel{display:none;background:rgba(255,255,255,.05);border-radius:10px;padding:10px 14px;margin:8px 0;border:1px solid #333}
+.dir-panel.on{display:block}
+.dir-panel label{font-size:.8em;color:#888;margin-right:10px}
+.dir-panel input[type=range]{width:100px;accent-color:#e94560}
+.dir-panel select{background:#222;color:#fff;border:1px solid #444;border-radius:4px;padding:3px 6px;font-size:.8em}
+</style>
 </head>
 <body>
-    <div class="movie-container">
-        <!-- Title Screen -->
-        <div class="title-screen">
-            <h1> Пирожки с нуля </h1>
-            <div class="subtitle">Тесто Времени | Кино-мультик | 15 минут</div>
-            <div class="timer-display" id="mainTimer">00:00</div>
-        </div>
-
-        <!-- Controls -->
-        <div class="controls">
-            <button class="btn-play" onclick="playMovie()">▶ Играть</button>
-            <button class="btn-pause" onclick="pauseMovie()">⏸ Пауза</button>
-            <button class="btn-reset" onclick="resetMovie()">⏹ Сброс</button>
-            <button class="btn-speed" onclick="changeSpeed()">⏩ Скорость</button>
-            <span class="speed-display">Скорость: <span id="speedValue">1x</span></span>
-            <div class="progress-bar">
-                <div class="progress-fill" id="progressFill"></div>
-            </div>
-        </div>
-
-        <!-- Episode Markers -->
-        <div class="episode-marker" id="ep0">
-            <h2> ПРОЛОГ </h2>
-            <p>Знакомство с Шефом Вишенкой</p>
-        </div>
-
-        <!-- Scene 1: Kitchen Morning -->
-        <div class="scene" id="scene1">
-            <div class="scene-header">
-                <span class="scene-number">СЦЕНА 1</span>
-                <span class="scene-time">00:00 - 01:30</span>
-            </div>
-            <div class="scene-title"> Кухня. Утро. </div>
-            <div class="scene-content">
-                <!-- Visual -->
-                <div class="visual-scene kitchen-bg">
-                    <div class="food-items">
-                        <div class="food-item" style="top:20%;left:10%;animation-delay:0s"> </div>
-                        <div class="food-item" style="top:30%;right:15%;animation-delay:0.5s"> </div>
-                        <div class="food-item" style="top:50%;left:20%;animation-delay:1s"> </div>
-                        <div class="food-item" style="top:60%;right:25%;animation-delay:1.5s"> </div>
-                    </div>
-                    <div class="chef"> ‍ </div>
-                </div>
-
-                <!-- Shot 1.1 -->
-                <div class="shot">
-                    <div class="shot-time">00:00 - 00:15</div>
-                    <div class="shot-desc">Камера медленно поднимается над кухонным столом. На столе: мука, вода, дрожжи.</div>
-                    <div class="animation-desc"> [АНИМАЦИЯ] Плавный подъём камеры, мерцание воды, покачивание пачки] </div>
-                    <div class="sound-desc"> [ЗВУК] Тихая утренняя музыка, пение птиц] </div>
-                </div>
-
-                <!-- Shot 1.2 -->
-                <div class="shot">
-                    <div class="shot-time">00:15 - 00:30</div>
-                    <div class="shot-desc">В кадр входит Шеф-Повар. Хлопает в ладоши.</div>
-                    <div class="character-speech">
-                        <div class="character-name">ШЕФ ВИШЕНКА</div>
-                        <div class="dialogue">"Привет, друзья! Я — Шеф Вишенка! И сегодня мы приготовим Пирожки Мечты!"</div>
-                    </div>
-                    <div class="animation-desc"> [АНИМАЦИЯ] Шеф входит, хлопает — искры из ладоней] </div>
-                </div>
-
-                <!-- Shot 1.3 -->
-                <div class="shot">
-                    <div class="shot-time">00:30 - 00:45</div>
-                    <div class="shot-desc">Шеф показывает пачку дрожжей. Пачка "улыбается".</div>
-                    <div class="character-speech">
-                        <div class="character-name">ШЕФ ВИШЕНКА</div>
-                        <div class="dialogue">"Сегодня мы приготовим Пирожки Мечты! Из покупного теста — но так, что оно станет домашним!"</div>
-                    </div>
-                </div>
-
-                <!-- Shot 1.4 -->
-                <div class="shot">
-                    <div class="shot-time">00:45 - 01:00</div>
-                    <div class="shot-desc">На экране появляется таймер. Шеф нажимает кнопку.</div>
-                    <div class="character-speech">
-                        <div class="character-name">ШЕФ ВИШЕНКА</div>
-                        <div class="dialogue">"Запускаем таймер! Пятнадцать минут — и у нас будут идеальные пирожки!" </div>
-                    </div>
-                    <div class="animation-desc"> [ТАЙМЕР] 00:00 запускается] </div>
-                </div>
-
-                <!-- Shot 1.5-1.6 -->
-                <div class="shot">
-                    <div class="shot-time">01:00 - 01:30</div>
-                    <div class="shot-desc">Титры эпизода. Шеф берёт миску и кувшин.</div>
-                    <div class="character-speech">
-                        <div class="character-name">ШЕФ ВИШЕНКА</div>
-                        <div class="dialogue">"Итак, первый шаг — тёплая вода. Не горячая, не холодная — тёплая."</div>
-                    </div>
-                </div>
-
-                <!-- Laugh Track -->
-                <div class="laugh-track" id="laugh1">
-                    <span class="laugh-emoji">😂 🤣 😆</span>
-                    ХА-ХА-ХА!
-                    <span class="laugh-emoji">😂 🤣 😆</span>
-                </div>
-            </div>
-        </div>
-
-        <!-- Episode Marker 1 -->
-        <div class="episode-marker" id="ep1">
-            <h2> ЭПИЗОД 1: ПРОБУЖДЕНИЕ </h2>
-            <p>Активация дрожжей (1:30 - 4:00)</p>
-        </div>
-
-        <!-- Scene 2: Yeast Activation -->
-        <div class="scene" id="scene2">
-            <div class="scene-header">
-                <span class="scene-number">СЦЕНА 2</span>
-                <span class="scene-time">01:30 - 04:00</span>
-            </div>
-            <div class="scene-title"> Пробуждение дрожжей </div>
-            <div class="scene-content">
-                <!-- Visual -->
-                <div class="visual-scene" style="background: linear-gradient(180deg, #1a1a2e, #16213e)">
-                    <div class="bubbles" id="bubbles1">
-                    </div>
-                    <div style="font-size:5em; z-index:10; position:relative">
-                         <br><span style="font-size:0.5em"> +  + </span>
-                    </div>
-                </div>
-
-                <!-- Shot 2.1 -->
-                <div class="shot">
-                    <div class="shot-time">01:30 - 01:45</div>
-                    <div class="shot-desc">Крупный план термометра: 37-40°C.</div>
-                    <div class="character-speech">
-                        <div class="character-name">ДИКТОР</div>
-                        <div class="dialogue">"Тридцать семь-сорок градусов. Идеальная температура для дрожжей."</div>
-                    </div>
-                </div>
-
-                <!-- Shot 2.2 -->
-                <div class="shot">
-                    <div class="shot-time">01:45 - 02:00</div>
-                    <div class="shot-desc">Шеф высыпает дрожжи в воду. Гранулы падают.</div>
-                    <div class="character-speech">
-                        <div class="character-name">ШЕФ ВИШЕНКА</div>
-                        <div class="dialogue">"Аккуратно высыпаем дрожжи. Смотрите, как они плавают!" </div>
-                    </div>
-                    <div class="animation-desc"> [АНИМАЦИЯ] Гранулы падают, some float, some sink] </div>
-                </div>
-
-                <!-- Shot 2.3 -->
-                <div class="shot">
-                    <div class="shot-time">02:00 - 02:15</div>
-                    <div class="shot-desc">Добавление сахара. Кристаллы тают.</div>
-                    <div class="character-speech">
-                        <div class="character-name">ШЕФ ВИШЕНКА</div>
-                        <div class="dialogue">"Сахар — это еда для дрожжей. Они его обожают!" </div>
-                    </div>
-                </div>
-
-                <!-- Shot 2.4 -->
-                <div class="shot">
-                    <div class="shot-time">02:15 - 02:30</div>
-                    <div class="shot-desc">Размешивание. Накрытие полотенцем.</div>
-                    <div class="character-speech">
-                        <div class="character-name">ШЕФ ВИШЕНКА</div>
-                        <div class="dialogue">"Перемешали и накрыли. Теперь ждём десять минут."</div>
-                    </div>
-                </div>
-
-                <!-- Shot 2.5-2.6 -->
-                <div class="shot">
-                    <div class="shot-time">02:30 - 03:00</div>
-                    <div class="shot-desc">Полотенце "дышит". Облачка вырываются.</div>
-                    <div class="animation-desc"> [АНИМАЦИЯ] Полотенце поднимается-опускается, облачка газа] </div>
-                    <div class="sound-desc"> [ЗВУК] Soft bubbling, rhythmic breathing] </div>
-                </div>
-
-                <!-- Shot 2.7 -->
-                <div class="shot">
-                    <div class="shot-time">03:00 - 03:15</div>
-                    <div class="shot-desc">Таймер ускоряется: 03:00 → 04:00.</div>
-                    <div class="animation-desc"> [ТАЙМЕР] Ускорение ×20] </div>
-                </div>
-
-                <!-- Shot 2.8-2.9 -->
-                <div class="shot">
-                    <div class="shot-time">03:15 - 03:45</div>
-                    <div class="shot-desc">Шеф снимает полотенце — пенная шапка!</div>
-                    <div class="character-speech">
-                        <div class="character-name">ШЕФ ВИШЕНКА</div>
-                        <div class="dialogue">"Вот это да! Дрожжи проснулись и начали работать!" </div>
-                    </div>
-                    <div class="character-speech">
-                        <div class="character-name">ШЕФ ВИШЕНКА</div>
-                        <div class="dialogue">"Видите эти пузырьки? Это углекислый газ. Именно он поднимет наше тесто!" </div>
-                    </div>
-                </div>
-
-                <!-- Laugh Track -->
-                <div class="laugh-track" id="laugh2">
-                    <span class="laugh-emoji"> 🤣 😂 😆</span>
-                    ХА-ХА-ХА!
-                    <span class="laugh-emoji"> 🤣 😂 😆</span>
-                </div>
-            </div>
-        </div>
-
-        <!-- Episode Marker 2 -->
-        <div class="episode-marker" id="ep2">
-            <h2> ЭПИЗОД 2: СМЕШЕНИЕ </h2>
-            <p>Создание теста (4:00 - 7:00)</p>
-        </div>
-
-        <!-- Scene 3: Dough Creation -->
-        <div class="scene" id="scene3">
-            <div class="scene-header">
-                <span class="scene-number">СЦЕНА 3</span>
-                <span class="scene-time">04:00 - 07:00</span>
-            </div>
-            <div class="scene-title"> Создание теста </div>
-            <div class="scene-content">
-                <!-- Visual -->
-                <div class="visual-scene" style="background: linear-gradient(180deg, #fff5e6, #ffe4c4)">
-                    <div class="food-items">
-                        <div class="food-item" style="top:20%;left:10%"> </div>
-                        <div class="food-item" style="top:40%;right:10%"> </div>
-                        <div class="food-item" style="bottom:20%;left:30%"> </div>
-                    </div>
-                    <div style="font-size:6em; z-index:10; position:relative"> </div>
-                </div>
-
-                <!-- Shot 3.1 -->
-                <div class="shot">
-                    <div class="shot-time">04:00 - 04:15</div>
-                    <div class="shot-desc">Шеф берёт большую миску. Ставит на стол.</div>
-                    <div class="character-speech">
-                        <div class="character-name">ШЕФ ВИШЕНКА</div>
-                        <div class="dialogue">"А теперь — главный ингредиент. Мука!" </div>
-                    </div>
-                </div>
-
-                <!-- Shot 3.2 -->
-                <div class="shot">
-                    <div class="shot-time">04:15 - 04:30</div>
-                    <div class="shot-desc">500 г муки высыпается горкой. Облачко пыли.</div>
-                    <div class="character-speech">
-                        <div class="character-name">ДИКТОР</div>
-                        <div class="dialogue">"Пятьсот граммов муки высшего сорта. Обязательно просеиваем!" </div>
-                    </div>
-                </div>
-
-                <!-- Shot 3.3 -->
-                <div class="shot">
-                    <div class="shot-time">04:30 - 04:45</div>
-                    <div class="shot-desc">Углубление в муке. Вливание дрожжевой смеси.</div>
-                    <div class="character-speech">
-                        <div class="character-name">ШЕФ ВИШЕНКА</div>
-                        <div class="dialogue">"Делаем углубление и вливаем наши дрожжи."</div>
-                    </div>
-                </div>
-
-                <!-- Shot 3.4 -->
-                <div class="shot">
-                    <div class="shot-time">04:45 - 05:00</div>
-                    <div class="shot-desc">Добавление масла, соли, сахара.</div>
-                    <div class="character-speech">
-                        <div class="character-name">ШЕФ ВИШЕНКА</div>
-                        <div class="dialogue">"Масло — для эластичности. Соль — для вкуса. Сахар — для мягкости."</div>
-                    </div>
-                </div>
-
-                <!-- Shot 3.5-3.6 -->
-                <div class="shot">
-                    <div class="shot-time">05:00 - 05:30</div>
-                    <div class="shot-desc">Замес теста. Мука впитывает жидкость.</div>
-                    <div class="character-speech">
-                        <div class="character-name">ШЕФ ВИШЕНКА</div>
-                        <div class="dialogue">"Начинаем месить. Медленно, аккуратно."</div>
-                    </div>
-                    <div class="animation-desc"> [АНИМАЦИЯ] Руки месят, тесто собирается в ком] </div>
-                </div>
-
-                <!-- Shot 3.7 -->
-                <div class="shot">
-                    <div class="shot-time">05:30 - 06:00</div>
-                    <div class="shot-desc">Таймер ускоряется: 05:30 → 06:30.</div>
-                    <div class="character-speech">
-                        <div class="character-name">ШЕФ ВИШЕНКА</div>
-                        <div class="dialogue">"Месим 10-15 минут! Тесто должно стать мягким, как облачко!" </div>
-                    </div>
-                </div>
-
-                <!-- Shot 3.8 -->
-                <div class="shot">
-                    <div class="shot-time">06:00 - 06:30</div>
-                    <div class="shot-desc">Тесто меняет текстуру — гладкое, упругое.</div>
-                    <div class="character-speech">
-                        <div class="character-name">ШЕФ ВИШЕНКА</div>
-                        <div class="dialogue">"Вот оно — идеальное тесто! Гладкое, упругое, не липнет к рукам."</div>
-                    </div>
-                </div>
-
-                <!-- Shot 3.9-3.12 -->
-                <div class="shot">
-                    <div class="shot-time">06:30 - 07:00</div>
-                    <div class="shot-desc">Шар из теста. Накрытие полотенцем.</div>
-                    <div class="character-speech">
-                        <div class="character-name">ШЕФ ВИШЕНКА</div>
-                        <div class="dialogue">"Теперь тесто должно подняться. Отправляем его в 'спальню' на один час!" </div>
-                    </div>
-                </div>
-
-                <!-- Laugh Track -->
-                <div class="laugh-track" id="laugh3">
-                    <span class="laugh-emoji"> 😂 🤣 😆</span>
-                    ХА-ХА-ХА!
-                    <span class="laugh-emoji"> 😂 🤣 😆</span>
-                </div>
-            </div>
-        </div>
-
-        <!-- Episode Marker 3 -->
-        <div class="episode-marker" id="ep3">
-            <h2> ЭПИЗОД 3: ОЖИДАНИЕ </h2>
-            <p>Настаивание теста (7:00 - 9:00)</p>
-        </div>
-
-        <!-- Scene 4: Dough Rising -->
-        <div class="scene" id="scene4">
-            <div class="scene-header">
-                <span class="scene-number">СЦЕНА 4</span>
-                <span class="scene-time">07:00 - 09:00</span>
-            </div>
-            <div class="scene-title"> Настаивание теста </div>
-            <div class="scene-content">
-                <!-- Visual -->
-                <div class="visual-scene" style="background: linear-gradient(180deg, #2d1b4e, #1a1a2e)">
-                    <div style="font-size:4em; z-index:10; position:relative">
-                         <span style="font-size:0.5em; display:block"> </span>
-                    </div>
-                </div>
-
-                <!-- Shot 4.1 -->
-                <div class="shot">
-                    <div class="shot-time">07:00 - 07:15</div>
-                    <div class="shot-desc">Таймер ускоряется: 07:00 → 15:00.</div>
-                    <div class="animation-desc"> [ТАЙМЕР] Ускорение ×60 — один час за 15 секунд] </div>
-                </div>
-
-                <!-- Shot 4.2 -->
-                <div class="shot">
-                    <div class="shot-time">07:15 - 07:30</div>
-                    <div class="shot-desc">Тесто под полотенцем увеличивается вдвое.</div>
-                    <div class="character-speech">
-                        <div class="character-name">ДИКТОР</div>
-                        <div class="dialogue">"Один час брожения. Дрожжи работают, выделяя газ. Тесто поднимается вдвое."</div>
-                    </div>
-                </div>
-
-                <!-- Shot 4.3 -->
-                <div class="shot">
-                    <div class="shot-time">07:30 - 07:45</div>
-                    <div class="shot-desc">Шеф читает книгу "Тайны хлебопечения".</div>
-                    <div class="character-speech">
-                        <div class="character-name">ШЕФ ВИШЕНКА</div>
-                        <div class="dialogue">"Терпение — ключ к хорошему тесту. Нельзя торопить дрожжи."</div>
-                    </div>
-                </div>
-
-                <!-- Shot 4.4-4.5 -->
-                <div class="shot">
-                    <div class="shot-time">07:45 - 08:15</div>
-                    <div class="shot-desc">Снятие полотенца — пышное тесто!</div>
-                    <div class="character-speech">
-                        <div class="character-name">ШЕФ ВИШЕНКА</div>
-                        <div class="dialogue">"Великолепно! Тесто поднялось вдвое! Оно готово к следующему шагу."</div>
-                    </div>
-                </div>
-
-                <!-- Shot 4.6 -->
-                <div class="shot">
-                    <div class="shot-time">08:15 - 08:30</div>
-                    <div class="shot-desc">Обминка теста — выпуск воздуха.</div>
-                    <div class="character-speech">
-                        <div class="character-name">ШЕФ ВИШЕНКА</div>
-                        <div class="dialogue">"Обминаем тесто. Выпускаем лишний воздух."</div>
-                    </div>
-                </div>
-
-                <!-- Shot 4.7-4.8 -->
-                <div class="shot">
-                    <div class="shot-time">08:30 - 09:00</div>
-                    <div class="shot-desc">Колбаска разрезается на 12 частей.</div>
-                    <div class="character-speech">
-                        <div class="character-name">ШЕФ ВИШЕНКА</div>
-                        <div class="dialogue">"Двенадцать кусочков — двенадцать будущих пирожков. Каждый — шедевр!" </div>
-                    </div>
-                </div>
-
-                <!-- Laugh Track -->
-                <div class="laugh-track" id="laugh4">
-                    <span class="laugh-emoji"> 🤣 😂 😆</span>
-                    ХА-ХА-ХА!
-                    <span class="laugh-emoji"> 🤣 😂 😆</span>
-                </div>
-            </div>
-        </div>
-
-        <!-- Episode Marker 4 -->
-        <div class="episode-marker" id="ep4">
-            <h2> ЭПИЗОД 4: НАЧИНКА </h2>
-            <p>Приготовление начинки (9:00 - 11:00)</p>
-        </div>
-
-        <!-- Scene 5: Filling -->
-        <div class="scene" id="scene5">
-            <div class="scene-header">
-                <span class="scene-number">СЦЕНА 5</span>
-                <span class="scene-time">09:00 - 11:00</span>
-            </div>
-            <div class="scene-title"> Приготовление начинки </div>
-            <div class="scene-content">
-                <!-- Visual -->
-                <div class="visual-scene" style="background: linear-gradient(180deg, #4a3728, #2d1b12)">
-                    <div class="food-items">
-                        <div class="food-item" style="top:20%;left:15%;animation-delay:0s"> </div>
-                        <div class="food-item" style="top:30%;right:15%;animation-delay:0.3s"> </div>
-                        <div class="food-item" style="top:50%;left:25%;animation-delay:0.6s"> </div>
-                        <div class="food-item" style="bottom:20%;right:25%;animation-delay:0.9s"> </div>
-                    </div>
-                    <div style="font-size:5em; z-index:10; position:relative"> </div>
-                </div>
-
-                <!-- Shot 5.1 -->
-                <div class="shot">
-                    <div class="shot-time">09:00 - 09:15</div>
-                    <div class="shot-desc">Шеф достаёт продукты из холодильника.</div>
-                    <div class="character-speech">
-                        <div class="character-name">ШЕФ ВИШЕНКА</div>
-                        <div class="dialogue">"Классическая начинка — мясной фарш с луком. Но можно всё что угодно!" </div>
-                    </div>
-                </div>
-
-                <!-- Shot 5.2 -->
-                <div class="shot">
-                    <div class="shot-time">09:15 - 09:30</div>
-                    <div class="shot-desc">Нарезка лука. Лук "плачет".</div>
-                    <div class="character-speech">
-                        <div class="character-name">ШЕФ ВИШЕНКА</div>
-                        <div class="dialogue">"Лук — душа начинки. Хоть и заставляет плакать."</div>
-                    </div>
-                    <div class="animation-desc"> [АНИМАЦИЯ] Лук "плачет" — маленькие слёзы] </div>
-                </div>
-
-                <!-- Shot 5.3 -->
-                <div class="shot">
-                    <div class="shot-time">09:30 - 09:45</div>
-                    <div class="shot-desc">Обжарка лука. Шшшш!</div>
-                    <div class="sound-desc"> [ЗВУК] Sizzling, oil crackling] </div>
-                </div>
-
-                <!-- Shot 5.4 -->
-                <div class="shot">
-                    <div class="shot-time">09:45 - 10:00</div>
-                    <div class="shot-desc">Добавление фарша. Перемешивание.</div>
-                    <div class="character-speech">
-                        <div class="character-name">ШЕФ ВИШЕНКА</div>
-                        <div class="dialogue">"Добавляем фарш и разбиваем комки."</div>
-                    </div>
-                </div>
-
-                <!-- Shot 5.5 -->
-                <div class="shot">
-                    <div class="shot-time">10:00 - 10:15</div>
-                    <div class="shot-desc">Соль, перец, зелень.</div>
-                    <div class="character-speech">
-                        <div class="character-name">ШЕФ ВИШЕНКА</div>
-                        <div class="dialogue">"Соль, перец, зелень. По вкусу. Не жалейте зелени!" </div>
-                    </div>
-                </div>
-
-                <!-- Shot 5.6 -->
-                <div class="shot">
-                    <div class="shot-time">10:15 - 10:30</div>
-                    <div class="shot-desc">Шеф пробует начинку. "Идеально!"</div>
-                    <div class="character-speech">
-                        <div class="character-name">ШЕФ ВИШЕНКА</div>
-                        <div class="dialogue">"Ммм! Идеально! Начинка — готова."</div>
-                    </div>
-                </div>
-
-                <!-- Shot 5.7-5.8 -->
-                <div class="shot">
-                    <div class="shot-time">10:30 - 11:00</div>
-                    <div class="shot-desc">Начинка остывает. Нельзя класть горячую!</div>
-                    <div class="character-speech">
-                        <div class="character-name">ШЕФ ВИШЕНКА</div>
-                        <div class="dialogue">"Горячую начинку нельзя класть в тесто — оно размокнет и порвётся!" </div>
-                    </div>
-                </div>
-
-                <!-- Laugh Track -->
-                <div class="laugh-track" id="laugh5">
-                    <span class="laugh-emoji"> 😂 🤣 😆</span>
-                    ХА-ХА-ХА!
-                    <span class="laugh-emoji"> 😂 🤣 😆</span>
-                </div>
-            </div>
-        </div>
-
-        <!-- Episode Marker 5 -->
-        <div class="episode-marker" id="ep5">
-            <h2> ЭПИЗОД 5: ЛЕПКА </h2>
-            <p>Формировка пирожков (11:00 - 13:00)</p>
-        </div>
-
-        <!-- Scene 6: Shaping -->
-        <div class="scene" id="scene6">
-            <div class="scene-header">
-                <span class="scene-number">СЦЕНА 6</span>
-                <span class="scene-time">11:00 - 13:00</span>
-            </div>
-            <div class="scene-title"> Лепка пирожков </div>
-            <div class="scene-content">
-                <!-- Visual -->
-                <div class="visual-scene" style="background: linear-gradient(180deg, #f5deb3, #deb887)">
-                    <div class="food-items">
-                        <div class="food-item" style="top:15%;left:10%"> </div>
-                        <div class="food-item" style="top:25%;right:10%"> </div>
-                        <div class="food-item" style="top:45%;left:20%"> </div>
-                        <div class="food-item" style="top:55%;right:20%"> </div>
-                        <div class="food-item" style="bottom:15%;left:30%"> </div>
-                        <div class="food-item" style="bottom:25%;right:30%"> </div>
-                    </div>
-                    <div style="font-size:5em; z-index:10; position:relative"> </div>
-                </div>
-
-                <!-- Shot 6.1 -->
-                <div class="shot">
-                    <div class="shot-time">11:00 - 11:15</div>
-                    <div class="shot-desc">Шеф берёт кусочек теста. Формирует шарик.</div>
-                    <div class="character-speech">
-                        <div class="character-name">ШЕФ ВИШЕНКА</div>
-                        <div class="dialogue">"Берём кусочек теста и начинаем раскатывать."</div>
-                    </div>
-                </div>
-
-                <!-- Shot 6.2 -->
-                <div class="shot">
-                    <div class="shot-time">11:15 - 11:30</div>
-                    <div class="shot-desc">Раскатка в лепёшку 10-12 см.</div>
-                    <div class="character-speech">
-                        <div class="character-name">ШЕФ ВИШЕНКА</div>
-                        <div class="dialogue">"Раскатываем от центра к краям. Не слишком тонко!" </div>
-                    </div>
-                </div>
-
-                <!-- Shot 6.3 -->
-                <div class="shot">
-                    <div class="shot-time">11:30 - 11:45</div>
-                    <div class="shot-desc">Столовая ложка начинки в центр.</div>
-                    <div class="character-speech">
-                        <div class="character-name">ШЕФ ВИШЕНКА</div>
-                        <div class="dialogue">"Столовая ложка начинки — ровно в центр."</div>
-                    </div>
-                </div>
-
-                <!-- Shot 6.4-6.5 -->
-                <div class="shot">
-                    <div class="shot-time">11:45 - 12:15</div>
-                    <div class="shot-desc">Защипывание краёв. Крупный план.</div>
-                    <div class="character-speech">
-                        <div class="character-name">ШЕФ ВИШЕНКА</div>
-                        <div class="dialogue">"Защипываем крепко, но аккуратно. Шов — это душа пирожка!" </div>
-                    </div>
-                    <div class="animation-desc"> [КРУПНЫЙ ПЛАН] Пальцы формируют защипы, пирожок — лодочка] </div>
-                </div>
-
-                <!-- Shot 6.6-6.7 -->
-                <div class="shot">
-                    <div class="shot-time">12:15 - 12:45</div>
-                    <div class="shot-desc">Готовый пирожок. Ставит на противень.</div>
-                    <div class="character-speech">
-                        <div class="character-name">ШЕФ ВИШЕНКА</div>
-                        <div class="dialogue">"Отлично! Этот — на противень. Осталось десять!" </div>
-                    </div>
-                </div>
-
-                <!-- Shot 6.8 -->
-                <div class="shot">
-                    <div class="shot-time">12:45 - 13:00</div>
-                    <div class="shot-desc">Монтаж: 12 пирожков на противне.</div>
-                    <div class="character-speech">
-                        <div class="character-name">ШЕФ ВИШЕНКА</div>
-                        <div class="dialogue">"Двенадцать пирожков — двенадцать побед! Готовы к выпечке!" </div>
-                    </div>
-                </div>
-
-                <!-- Laugh Track -->
-                <div class="laugh-track" id="laugh6">
-                    <span class="laugh-emoji"> 🤣 😂 😆</span>
-                    ХА-ХА-ХА!
-                    <span class="laugh-emoji"> 🤣 😂 😆</span>
-                </div>
-            </div>
-        </div>
-
-        <!-- Episode Marker 6 -->
-        <div class="episode-marker" id="ep6">
-            <h2> ЭПИЗОД 6: ВЫПЕЧКА </h2>
-            <p>Духовка (13:00 - 14:30)</p>
-        </div>
-
-        <!-- Scene 7: Baking -->
-        <div class="scene" id="scene7">
-            <div class="scene-header">
-                <span class="scene-number">СЦЕНА 7</span>
-                <span class="scene-time">13:00 - 14:30</span>
-            </div>
-            <div class="scene-title"> Выпечка </div>
-            <div class="scene-content">
-                <!-- Visual -->
-                <div class="visual-scene oven-glow" style="background: linear-gradient(180deg, #8b0000, #4a0000)">
-                    <div class="steam" style="top:10%;left:30%"> </div>
-                    <div class="steam" style="top:15%;left:50%;animation-delay:0.5s"> </div>
-                    <div class="steam" style="top:20%;left:70%;animation-delay:1s"> </div>
-                    <div style="font-size:6em; z-index:10; position:relative"> </div>
-                </div>
-
-                <!-- Shot 7.1 -->
-                <div class="shot">
-                    <div class="shot-time">13:00 - 13:10</div>
-                    <div class="shot-desc">Разогрев духовки до 180°C.</div>
-                    <div class="character-speech">
-                        <div class="character-name">ШЕФ ВИШЕНКА</div>
-                        <div class="dialogue">"Разогреваем духовку до ста восьмидесяти градусов."</div>
-                    </div>
-                </div>
-
-                <!-- Shot 7.2 -->
-                <div class="shot">
-                    <div class="shot-time">13:10 - 13:20</div>
-                    <div class="shot-desc">Смазка яйцом. Пирожки блестят.</div>
-                    <div class="character-speech">
-                        <div class="character-name">ШЕФ ВИШЕНКА</div>
-                        <div class="dialogue">"Смазываем яйцом — будет золотистая корочка!" </div>
-                    </div>
-                </div>
-
-                <!-- Shot 7.3 -->
-                <div class="shot">
-                    <div class="shot-time">13:20 - 13:30</div>
-                    <div class="shot-desc">Противень в духовку. Дверца закрывается.</div>
-                    <div class="character-speech">
-                        <div class="character-name">ШЕФ ВИШЕНКА</div>
-                        <div class="dialogue">"В духовку! Двадцать пять-тридцать минут. Не открываем!" </div>
-                    </div>
-                </div>
-
-                <!-- Shot 7.4-7.5 -->
-                <div class="shot">
-                    <div class="shot-time">13:30 - 13:50</div>
-                    <div class="shot-desc">Таймер ускоряется. Пирожки поднимаются и золотятся.</div>
-                    <div class="animation-desc"> [ТАЙМЕР] 13:30 → 14:00 (×20)] </div>
-                    <div class="animation-desc"> [АНИМАЦИЯ] Пирожки растут, корочка золотится] </div>
-                </div>
-
-                <!-- Shot 7.6 -->
-                <div class="shot">
-                    <div class="shot-time">13:50 - 14:00</div>
-                    <div class="shot-desc">Духовка открывается! Облака аромата!</div>
-                    <div class="character-speech">
-                        <div class="character-name">ШЕФ ВИШЕНКА</div>
-                        <div class="dialogue">"Ааааа! Запах! Это просто волшебство!" </div>
-                    </div>
-                    <div class="animation-desc"> [АНИМАЦИЯ] Облака аромата формируют сердечко] </div>
-                </div>
-
-                <!-- Shot 7.7-7.8 -->
-                <div class="shot">
-                    <div class="shot-time">14:00 - 14:30</div>
-                    <div class="shot-desc">Пирожки на решётке. Пружинят при нажатии.</div>
-                    <div class="character-speech">
-                        <div class="character-name">ШЕФ ВИШЕНКА</div>
-                        <div class="dialogue">"Хрустящая корочка, мягкое тесто — идеально!" </div>
-                    </div>
-                </div>
-
-                <!-- Laugh Track -->
-                <div class="laugh-track" id="laugh7">
-                    <span class="laugh-emoji"> 😂 🤣 😆</span>
-                    ХА-ХА-ХА!
-                    <span class="laugh-emoji"> 😂 🤣 😆</span>
-                </div>
-            </div>
-        </div>
-
-        <!-- Episode Marker 7 -->
-        <div class="episode-marker" id="ep7">
-            <h2> ФИНАЛ </h2>
-            <p>Дегустация (14:30 - 15:00)</p>
-        </div>
-
-        <!-- Scene 8: Finale -->
-        <div class="scene" id="scene8">
-            <div class="scene-header">
-                <span class="scene-number">СЦЕНА 8</span>
-                <span class="scene-time">14:30 - 15:00</span>
-            </div>
-            <div class="scene-title"> Дегустация </div>
-            <div class="scene-content">
-                <!-- Visual -->
-                <div class="visual-scene" style="background: linear-gradient(180deg, #ffd700, #ff8c00)">
-                    <div class="food-items">
-                        <div class="pirozhok" style="animation-delay:0s"> </div>
-                        <div class="pirozhok" style="animation-delay:0.2s"> </div>
-                        <div class="pirozhok" style="animation-delay:0.4s"> </div>
-                        <div class="pirozhok" style="animation-delay:0.6s"> </div>
-                        <div class="pirozhok" style="animation-delay:0.8s"> </div>
-                        <div class="pirozhok" style="animation-delay:1.0s"> </div>
-                    </div>
-                    <div style="font-size:7em; z-index:10; position:relative"> </div>
-                </div>
-
-                <!-- Shot 8.1 -->
-                <div class="shot">
-                    <div class="shot-time">14:30 - 14:40</div>
-                    <div class="shot-desc">Разрез пирожка пополам. Пар!</div>
-                    <div class="character-speech">
-                        <div class="character-name">ШЕФ ВИШЕНКА</div>
-                        <div class="dialogue">"А теперь — самый важный момент. Разрезаем!" </div>
-                    </div>
-                    <div class="animation-desc"> [КРУПНЫЙ ПЛАН] Нож, хруст корочки, пар, начинка] </div>
-                </div>
-
-                <!-- Shot 8.2 -->
-                <div class="shot">
-                    <div class="shot-time">14:40 - 14:45</div>
-                    <div class="shot-desc">Внутренность пирожка. Идеальная структура.</div>
-                    <div class="character-speech">
-                        <div class="character-name">ДИКТОР</div>
-                        <div class="dialogue">"Хрустящая корочка. Мягкое, воздушное тесто. Сочная начинка. Идеальный пирожок."</div>
-                    </div>
-                </div>
-
-                <!-- Shot 8.3 -->
-                <div class="shot">
-                    <div class="shot-time">14:45 - 14:50</div>
-                    <div class="shot-desc">Шеф откусывает. Закрывает глаза.</div>
-                    <div class="character-speech">
-                        <div class="character-name">ШЕФ ВИШЕНКА</div>
-                        <div class="dialogue">"Ммммм! Это... это лучшие пирожки в моей жизни!" </div>
-                    </div>
-                </div>
-
-                <!-- Shot 8.4-8.5 -->
-                <div class="shot">
-                    <div class="shot-time">14:50 - 15:00</div>
-                    <div class="shot-desc">Титры. Список ингредиентов. Шеф машет.</div>
-                    <div class="character-speech">
-                        <div class="character-name">ШЕФ ВИШЕНКА</div>
-                        <div class="dialogue">"Приятного аппетита, друзья! Запомним: покупное тесто — это не приговор!" </div>
-                    </div>
-                    <div class="character-speech">
-                        <div class="character-name">ДИКТОР</div>
-                        <div class="dialogue">"Конец. Рецепт и тайминг — в описании."</div>
-                    </div>
-                </div>
-
-                <!-- Final Laugh Track -->
-                <div class="laugh-track" id="laugh8">
-                    <span class="laugh-emoji"> 😂 🤣 😆 🎉</span>
-                    ХА-ХА-ХА! КОНЕЦ!
-                    <span class="laugh-emoji"> 🎉 😂 🤣 😆</span>
-                </div>
-            </div>
-        </div>
-
-        <!-- Finale Screen -->
-        <div class="finale">
-            <h1> КОНЕЦ </h1>
-            <p style="font-size:1.3em; margin-bottom:30px">Приятного аппетита!</p>
-
-            <div class="recipe-card">
-                <h3> Ингредиенты </h3>
-                <ul>
-                    <li>Мука — 500 г</li>
-                    <li>Сухие дрожжи — 10 г</li>
-                    <li>Тёплая вода — 250 мл</li>
-                    <li>Сахар — 1 ст.л.</li>
-                    <li>Соль — 1 ч.л.</li>
-                    <li>Растительное масло — 2 ст.л.</li>
-                    <li>Фарш — 300 г</li>
-                    <li>Лук — 2 шт.</li>
-                    <li>Яйцо — 1 шт.</li>
-                    <li>Зелень, соль, перец — по вкусу</li>
-                </ul>
-            </div>
-
-            <div class="recipe-card">
-                <h3> Тайминг </h3>
-                <ul>
-                    <li>00:00 - 01:30 — Пролог</li>
-                    <li>01:30 - 04:00 — Пробуждение дрожжей</li>
-                    <li>04:00 - 07:00 — Смешение и замес</li>
-                    <li>07:00 - 09:00 — Настаивание теста</li>
-                    <li>09:00 - 11:00 — Приготовление начинки</li>
-                    <li>11:00 - 13:00 — Формировка пирожков</li>
-                    <li>13:00 - 14:30 — Выпечка</li>
-                    <li>14:30 - 15:00 — Дегустация</li>
-                </ul>
-            </div>
-        </div>
-    </div>
-
-    <!-- Laugh Visual Overlay -->
-    <div class="laugh-visual" id="laughOverlay">
-        <div class="laugh-content">
-            <span class="big-emoji">😂</span>
-            <div class="laugh-text">ХА-ХА-ХА!</div>
-        </div>
-    </div>
-
-    <!-- Audio for Laugh Track (using Web Audio API) -->
-    <script>
-        // Audio Context for laugh sounds
-        let audioCtx = null;
-
-        function initAudio() {
-            if (!audioCtx) {
-                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+<div id="intro">
+    <canvas id="introC" width="240" height="240"></canvas>
+    <h1>Пирожки с нуля</h1>
+    <p>Кино-мультик | Тесто Времени | 15 минут</p>
+    <div id="introClock" style="font-family:'Courier New';font-size:1.8em;color:#0f0;margin-bottom:20px">00:00</div>
+    <button class="bigbtn" id="startBtn">▶ СМОТРЕТЬ</button>
+    <div class="hint">Пробел — пауза &nbsp;|&nbsp; ← → — перемотка &nbsp;|&nbsp; D — режиссёр</div>
+</div>
+<div class="lov" id="lov"><div style="text-align:center"><div class="big">😂</div><div class="ltxt">ХА-ХА-ХА!</div></div></div>
+
+<div class="wrap">
+<div class="hdr">
+    <h1>Пирожки с нуля</h1>
+    <div class="sub">Тесто Времени | Canvas Анимация</div>
+    <div id="clock">00:00</div>
+</div>
+<div class="ctrls">
+    <button class="bg" onclick="go()">▶</button>
+    <button class="bp" onclick="stop()">⏸</button>
+    <button class="br" onclick="back()">◀◀</button>
+    <button class="bs" onclick="fast()">⏩</button>
+    <button class="bi" onclick="toggleDir()">🎬</button>
+    <span class="spd" id="spd">1x</span>
+    <div class="pbar"><div class="pfill" id="pf"></div></div>
+</div>
+<div class="dir-panel" id="dirPanel">
+    <label>Камера X: <input type="range" id="camX" min="-50" max="50" value="0" oninput="dirUpdate()"></label>
+    <label>Камера Y: <input type="range" id="camY" min="-30" max="30" value="0" oninput="dirUpdate()"></label>
+    <label>Свет: <input type="range" id="light" min="30" max="120" value="80" oninput="dirUpdate()"></label>
+    <label>Настроение: <select id="mood" onchange="dirUpdate()"><option value="cheerful">Весёлое</option><option value="dramatic">Драма</option><option value="calm">Спокойное</option><option value="romantic">Романтика</option></select></label>
+    <label>Скорость анимации: <input type="range" id="animSpd" min="2" max="20" value="10" oninput="dirUpdate()"></label>
+</div>
+
+<div class="epi" id="ep0"><h2>ПРОЛОГ</h2><p>Знакомство с Шефом Вишенкой</p></div>
+
+<div class="scene" id="s1"><div class="shdr"><span class="snum">СЦЕНА 1</span><span class="stm">00:00 — 01:30</span></div><div class="stitle">Кухня. Утро.</div><div class="scont">
+<div class="visual"><canvas id="c1" width="920" height="300"></canvas></div>
+<div class="shot"><div class="st">00:00 — 00:15</div><div class="sd">Камера поднимается над кухонным столом. Мука, вода, дрожжи.</div><div class="an">[КАМЕРА] Плавный подъём с фокусировкой]</div></div>
+<div class="shot"><div class="st">00:15 — 00:35</div><div class="sd">Входит Шеф-Повар. Хлопает в ладоши — искры!</div><div class="dia"><div class="dn">ШЕФ ВИШЕНКА</div><div class="dt">"Привет, друзья! Я — Шеф Вишенка! Сегодня приготовим Пирожки Мечты!"</div></div></div>
+<div class="shot"><div class="st">00:35 — 00:50</div><div class="sd">Шеф показывает пачку дрожжей. Рисует в воздухе.</div><div class="dia"><div class="dn">ШЕФ ВИШЕНКА</div><div class="dt">"Сначала — дрожжи! Без них ничего не взлетит!"</div></div></div>
+<div class="shot"><div class="st">00:50 — 01:10</div><div class="sd">Таймер. Нажатие кнопки.</div><div class="dia"><div class="dn">ШЕФ ВИШЕНКА</div><div class="dt">"Пятнадцать минут — и пирожки готовы!"</div></div></div>
+<div class="shot"><div class="st">01:10 — 01:30</div><div class="sd">Шеф берёт миску и кувшин.</div><div class="dia"><div class="dn">ШЕФ ВИШЕНКА</div><div class="dt">"Первый шаг — тёплая вода. Не горячая, не холодная — тёплая, как объятие."</div></div></div>
+<div class="laugh" id="l1">😂🤣😆<br>ХА-ХА-ХА!<br>😂🤣😆</div>
+</div></div>
+
+<div class="epi" id="ep1"><h2>ЭПИЗОД 1: ПРОБУЖДЕНИЕ</h2><p>Активация дрожжей</p></div>
+
+<div class="scene" id="s2"><div class="shdr"><span class="snum">СЦЕНА 2</span><span class="stm">01:30 — 04:00</span></div><div class="stitle">Пробуждение дрожжей</div><div class="scont">
+<div class="visual"><canvas id="c2" width="920" height="300"></canvas></div>
+<div class="shot"><div class="st">01:30 — 01:50</div><div class="sd">Термометр: 37-40°C. Капли конденсата.</div><div class="dia"><div class="dn">ДИКТОР</div><div class="dt">"Тридцать семь-сорок градусов. Идеальная температура для жизни дрожжей."</div></div></div>
+<div class="shot"><div class="st">01:50 — 02:10</div><div class="sd">Дрожжи падают в воду. Гранулы тонут и всплывают.</div><div class="dia"><div class="dn">ШЕФ ВИШЕНКА</div><div class="dt">"Смотрите — одни тонут, другие плавают! Каждая гранула — живая!"</div></div><div class="an">[АНИМАЦИЯ] Физика частиц: гравитация + плавучесть]</div></div>
+<div class="shot"><div class="st">02:10 — 02:25</div><div class="sd">Щепотка сахара. Кристаллы растворяются.</div><div class="dia"><div class="dn">ШЕФ ВИШЕНКА</div><div class="dt">"Сахар — первая еда. Дрожжи его обожают!"</div></div></div>
+<div class="shot"><div class="st">02:25 — 03:10</div><div class="sd">Полотенце дышит. Пузырьки лопаются. Время идёт.</div><div class="dia"><div class="dn">ДИКТОР</div><div class="dt">"Дрожжи — одноклеточные грибы. Съедают сахар и выделяют CO₂. Это и есть жизнь теста."</div></div><div class="an">[ТАЙМЕР] ×20 ускорение]</div></div>
+<div class="shot"><div class="st">03:10 — 03:40</div><div class="sd">Пенная шапка! Пузырьки лопаются на поверхности.</div><div class="dia"><div class="dn">ШЕФ ВИШЕНКА</div><div class="dt">"Посмотрите! Живая пена! Дрожжи проснулись!"</div></div></div>
+<div class="shot"><div class="st">03:40 — 04:00</div><div class="sd">Крупный план: структура пены. Микро-пузырьки.</div><div class="dia"><div class="dn">ШЕФ ВИШЕНКА</div><div class="dt">"Каждый пузырёк — будущий пористый хлеб."</div></div></div>
+<div class="laugh" id="l2">🤣😂😆<br>ХА-ХА-ХА!<br>🤣😂😆</div>
+</div></div>
+
+<div class="epi" id="ep2"><h2>ЭПИЗОД 2: СМЕШЕНИЕ</h2><p>Создание теста</p></div>
+
+<div class="scene" id="s3"><div class="shdr"><span class="snum">СЦЕНА 3</span><span class="stm">04:00 — 07:00</span></div><div class="stitle">Создание теста</div><div class="scont">
+<div class="visual"><canvas id="c3" width="920" height="300"></canvas></div>
+<div class="shot"><div class="st">04:00 — 04:20</div><div class="sd">500 г муки горкой. Просеивание.</div><div class="dia"><div class="dn">ШЕФ ВИШЕНКА</div><div class="dt">"Мука — фундамент. Просеиваем обязательно — насыщаем кислородом!"</div></div></div>
+<div class="shot"><div class="st">04:20 — 04:50</div><div class="sd">Углубление. Вливаем дрожжи. Масло, соль, сахар.</div><div class="dia"><div class="dn">ШЕФ ВИШЕНКА</div><div class="dt">"Масло — эластичность. Соль — вкус. Сахар — золотистость корочки."</div></div></div>
+<div class="shot"><div class="st">04:50 — 05:40</div><div class="sd">Замес. Мука впитывает. Тесто формируется.</div><div class="dia"><div class="dn">ШЕФ ВИШЕНКА</div><div class="dt">"Месим от края к центру. Складываем. Поворачиваем. Повторяем."</div></div><div class="an">[АНИМАЦИЯ] Gluten-структура: нити белка натягиваются]</div></div>
+<div class="shot"><div class="st">05:40 — 06:20</div><div class="sd">Тесто меняет текстуру: гладкое, упругое. Не рвётся.</div><div class="dia"><div class="dn">ШЕФ ВИШЕНКА</div><div class="dt">"Вот оно — окно. Тесто тянется, но не рвётся. Gluten сформирован."</div></div></div>
+<div class="shot"><div class="st">06:20 — 07:00</div><div class="sd">Шар. В миску. Полотенце. В «спальню».</div><div class="dia"><div class="dn">ШЕФ ВИШЕНКА</div><div class="dt">"Один час покоя. Не трогать!"</div></div></div>
+<div class="laugh" id="l3">😂🤣😆<br>ХА-ХА-ХА!<br>😂🤣😆</div>
+</div></div>
+
+<div class="epi" id="ep3"><h2>ЭПИЗОД 3: ОЖИДАНИЕ</h2><p>Настаивание</p></div>
+
+<div class="scene" id="s4"><div class="shdr"><span class="snum">СЦЕНА 4</span><span class="stm">07:00 — 09:00</span></div><div class="stitle">Настаивание теста</div><div class="scont">
+<div class="visual"><canvas id="c4" width="920" height="300"></canvas></div>
+<div class="shot"><div class="st">07:00 — 07:30</div><div class="sd">Таймлапс. Тесто растёт под полотенцем. Тень от окна移动.</div><div class="an">[ТАЙМЕР] Час за 15 сек. Солнечный свет меняется]</div></div>
+<div class="shot"><div class="st">07:30 — 08:00</div><div class="sd">Шеф читает «Тайны хлебопечения». Страницы.</div><div class="dia"><div class="dn">ШЕФ ВИШЕНКА</div><div class="dt">"Интересный факт: в Египте буханку нашли в гробнице фараона. 3000 лет. До сих пор пахнет!"</div></div></div>
+<div class="shot"><div class="st">08:00 — 08:25</div><div class="sd">Полотенце поднимается. Тесто — вдвое. Пышное.</div><div class="dia"><div class="dn">ШЕФ ВИШЕНКА</div><div class="dt">"Великолепно! Газ внутри, структура — как у облака."</div></div></div>
+<div class="shot"><div class="st">08:25 — 08:45</div><div class="sd">Обминка. Воздух выходит. Тесто спадает.</div><div class="dia"><div class="dn">ШЕФ ВИШЕНКА</div><div class="dt">"Обминаем — перераспределяем дрожжи и газ."</div></div></div>
+<div class="shot"><div class="st">08:45 — 09:00</div><div class="sd">Колбаска. 12 кусочков. Весы.</div><div class="dia"><div class="dn">ШЕФ ВИШЕНКА</div><div class="dt">"Каждый кусочек — 60 граммов. Точно!"</div></div></div>
+<div class="laugh" id="l4">🤣😂😆<br>ХА-ХА-ХА!<br>🤣😂😆</div>
+</div></div>
+
+<div class="epi" id="ep4"><h2>ЭПИЗОД 4: НАЧИНКА</h2><p>Фарш, лук, специи</p></div>
+
+<div class="scene" id="s5"><div class="shdr"><span class="snum">СЦЕНА 5</span><span class="stm">09:00 — 11:00</span></div><div class="stitle">Приготовление начинки</div><div class="scont">
+<div class="visual"><canvas id="c5" width="920" height="300"></canvas></div>
+<div class="shot"><div class="st">09:00 — 09:25</div><div class="sd">Нарезка лука. Слеза. Крупный план ножа.</div><div class="dia"><div class="dn">ШЕФ ВИШЕНКА</div><div class="dt">"Лук — сердце начинки. Да, заставляет плакать, но без него — пусто."</div></div><div class="an">[КРУПНЫЙ ПЛАН] Кристаллы серы в луковице]</div></div>
+<div class="shot"><div class="st">09:25 — 09:50</div><div class="sd">Масло в сковороде. Лук шкворчит. Мелард.</div><div class="dia"><div class="dn">ШЕФ ВИШЕНКА</div><div class="dt">"Мелардовая реакция — сахар + аминокислоты. Запах — это мелардин."</div></div></div>
+<div class="shot"><div class="st">09:50 — 10:20</div><div class="sd">Фарш. Розовый → коричневый. Maillard.</div><div class="dia"><div class="dn">ШЕФ ВИШЕНКА</div><div class="dt">"Не трогаем! Пусть корочка схватится. Потом перемешаем."</div></div></div>
+<div class="shot"><div class="st">10:20 — 10:40</div><div class="sd">Соль, перец, зелень. Тмин. Вкус.</div><div class="dia"><div class="dn">ШЕФ ВИШЕНКА</div><div class="dt">"Тмин — тайный ингредиент. Запомни!"</div></div></div>
+<div class="shot"><div class="st">10:40 — 11:00</div><div class="sd">Остывание. Пар уходит.</div><div class="dia"><div class="dn">ШЕФ ВИШЕНКА</div><div class="dt">"Горячая начинка = мокрое тесто = слёзы."</div></div></div>
+<div class="laugh" id="l5">😂🤣😆<br>ХА-ХА-ХА!<br>😂🤣😆</div>
+</div></div>
+
+<div class="epi" id="ep5"><h2>ЭПИЗОД 5: ЛЕПКА</h2><p>Формировка пирожков</p></div>
+
+<div class="scene" id="s6"><div class="shdr"><span class="snum">СЦЕНА 6</span><span class="stm">11:00 — 13:00</span></div><div class="stitle">Лепка пирожков</div><div class="scont">
+<div class="visual"><canvas id="c6" width="920" height="300"></canvas></div>
+<div class="shot"><div class="st">11:00 — 11:20</div><div class="sd">Катаем шарик. Раскатка от центра. Лепёшка.</div><div class="dia"><div class="dn">ШЕФ ВИШЕНКА</div><div class="dt">"Катаем от центра. Толщина — 4 миллиметра. Чувствуйте пальцами!"</div></div></div>
+<div class="shot"><div class="st">11:20 — 11:40</div><div class="sd">Ложка начинки. По весу. В центр.</div><div class="dia"><div class="dn">ШЕФ ВИШЕНКА</div><div class="dt">"Столовая ложка. Ровно в центр. Не экономьте, но не перебарщивайте."</div></div></div>
+<div class="shot"><div class="st">11:40 — 12:10</div><div class="sd">Защипы. Камера вращается. Красивый шов.</div><div class="dia"><div class="dn">ШЕФ ВИШЕНКА</div><div class="dt">"Шов — это инженерия. Пять защипов. Каждый — на 72 градуса."</div></div><div class="an">[КРУПНЫЙ ПЛАН] Защип-защип-защип-защип-защип]</div></div>
+<div class="shot"><div class="st">12:10 — 12:40</div><div class="sd">Лодочка. На противень. Ещё один. И ещё.</div><div class="dia"><div class="dn">ШЕФ ВИШЕНКА</div><div class="dt">"Каждый лучше предыдущего!"</div></div></div>
+<div class="shot"><div class="st">12:40 — 13:00</div><div class="sd">12 штук. Красиво. Симметрия.</div><div class="dia"><div class="dn">ШЕФ ВИШЕНКА</div><div class="dt">"Двенадцать шедевров!"</div></div></div>
+<div class="laugh" id="l6">🤣😂😆<br>ХА-ХА-ХА!<br>🤣😂😆</div>
+</div></div>
+
+<div class="epi" id="ep6"><h2>ЭПИЗОД 6: ВЫПЕЧКА</h2><p>Духовка</p></div>
+
+<div class="scene" id="s7"><div class="shdr"><span class="snum">СЦЕНА 7</span><span class="stm">13:00 — 14:30</span></div><div class="stitle">Выпечка</div><div class="scont">
+<div class="visual"><canvas id="c7" width="920" height="300"></canvas></div>
+<div class="shot"><div class="st">13:00 — 13:15</div><div class="sd">Духовка 180°. Яйцо. Кисточка.</div><div class="dia"><div class="dn">ШЕФ ВИШЕНКА</div><div class="dt">"Яйцо — это лак. Золотистость и блеск."</div></div></div>
+<div class="shot"><div class="st">13:15 — 13:30</div><div class="sd">Дверца. Стекло. Внутри — оранжевое свечение.</div><div class="dia"><div class="dn">ШЕФ ВИШЕНКА</div><div class="dt">"Инфракрасное излучение. Тепло проникает в тесто."</div></div></div>
+<div class="shot"><div class="st">13:30 — 14:00</div><div class="sd">Овен-стекло. Пирожки поднимаются. Корочка темнеет.</div><div class="an">[ТАЙМЕР] ×20. Дрожжи: última aliento → структура фиксируется]</div></div>
+<div class="shot"><div class="st">14:00 — 14:15</div><div class="sd">Аромат! Облака. Свет из духовки.</div><div class="dia"><div class="dn">ШЕФ ВИШЕНКА</div><div class="dt">"Карамелизация! Запах — это мелард + карамель!"</div></div></div>
+<div class="shot"><div class="st">14:15 — 14:30</div><div class="sd">Достаём. Золото. Пружинят.</div><div class="dia"><div class="dn">ШЕФ ВИШЕНКА</div><div class="dt">"Пружинят — значит готово. Если продавливается — ещё минуту."</div></div></div>
+<div class="laugh" id="l7">😂🤣😆<br>ХА-ХА-ХА!<br>😂🤣😆</div>
+</div></div>
+
+<div class="epi" id="ep7"><h2>ФИНАЛ</h2><p>Дегустация</p></div>
+
+<div class="scene" id="s8"><div class="shdr"><span class="snum">СЦЕНА 8</span><span class="stm">14:30 — 15:00</span></div><div class="stitle">Дегустация</div><div class="scont">
+<div class="visual"><canvas id="c8" width="920" height="300"></canvas></div>
+<div class="shot"><div class="st">14:30 — 14:42</div><div class="sd">Нож. Хруст. Разрез. Пар. Начинка.</div><div class="dia"><div class="dn">ШЕФ ВИШЕНКА</div><div class="dt">"Хруст корочки — карамелизированный сахар!"</div></div></div>
+<div class="shot"><div class="st">14:42 — 14:48</div><div class="sd">Крупный план: поры в тесте. Структура.</div><div class="dia"><div class="dn">ДИКТОР</div><div class="dt">"Поры — результат CO₂. Каждая — воздушный карман."</div></div></div>
+<div class="shot"><div class="st">14:48 — 14:54</div><div class="sd">Дегустация. Закрытые глаза. Улыбка.</div><div class="dia"><div class="dn">ШЕФ ВИШЕНКА</div><div class="dt">"Сочная начинка, хруст, мягкость. Это — баланс."</div></div></div>
+<div class="shot"><div class="st">14:54 — 15:00</div><div class="sd">Титры. Шеф машет.</div><div class="dia"><div class="dn">ШЕФ ВИШЕНКА</div><div class="dt">"Приятного аппетита! Покупное тесто — отправляй в мусорку!"</div></div></div>
+<div class="laugh" id="l8">😂🤣😆🎉<br>ХА-ХА-ХА! КОНЕЦ!<br>🎉😂🤣😆</div>
+</div></div>
+
+<div class="fin" id="finScr">
+<h1>КОНЕЦ</h1>
+<p style="font-size:1.1em;margin-bottom:16px">Приятного аппетита!</p>
+<div class="rcard"><h3>Ингредиенты</h3><ul>
+<li>Мука — 500 г</li><li>Дрожжи — 10 г</li><li>Вода — 250 мл</li><li>Сахар — 1 ст.л.</li><li>Соль — 1 ч.л.</li><li>Масло — 2 ст.л.</li><li>Фарш — 300 г</li><li>Лук — 2 шт.</li><li>Яйцо — 1</li><li>Тмин — щепотка</li>
+</ul></div>
+<div class="rcard"><h3>Тайминг</h3><ul>
+<li>00:00 — 01:30 Пролог</li><li>01:30 — 04:00 Дрожжи</li><li>04:00 — 07:00 Тесто</li><li>07:00 — 09:00 Настаивание</li><li>09:00 — 11:00 Начинка</li><li>11:00 — 13:00 Лепка</li><li>13:00 — 14:30 Выпечка</li><li>14:30 — 15:00 Дегустация</li>
+</ul></div>
+</div>
+</div>
+
+<script>
+var D={camX:0,camY:0,light:80,mood:'cheerful',animSpd:10};
+function dirUpdate(){D.camX=+document.getElementById('camX').value;D.camY=+document.getElementById('camY').value;D.light=+document.getElementById('light').value;D.mood=document.getElementById('mood').value;D.animSpd=+document.getElementById('animSpd').value}
+function toggleDir(){var p=document.getElementById('dirPanel');p.classList.toggle('on')}
+
+function clamp(v,a,b){return Math.max(a,Math.min(b,v))}
+
+/* ===== PARTICLE SYSTEM ===== */
+function Particles(){this.p=[]}
+Particles.prototype.add=function(x,y,vx,vy,life,color,size){this.p.push({x:x,y:y,vx:vx,vy:vy,life:life,maxLife:life,color:color,size:size||2})};
+Particles.prototype.update=function(dt){for(var i=this.p.length-1;i>=0;i--){var p=this.p[i];p.x+=p.vx*dt;p.y+=p.vy*dt;p.vy+=0.5*dt;p.life-=dt;if(p.life<=0)this.p.splice(i,1)}};
+Particles.prototype.draw=function(ctx){for(var i=0;i<this.p.length;i++){var p=this.p[i];var a=p.life/p.maxLife;ctx.globalAlpha=a;ctx.fillStyle=p.color;ctx.beginPath();ctx.arc(p.x,p.y,p.size*a,0,Math.PI*2);ctx.fill()}ctx.globalAlpha=1};
+
+var parts={};
+function getP(id){if(!parts[id])parts[id]=new Particles();return parts[id]}
+
+/* ===== CHEF DRAWING ===== */
+function drawChef(ctx,x,y,s,pose,mood,t){
+    s=s||1;ctx.save();ctx.translate(x,y);ctx.scale(s,s);
+
+    // Shadow
+    ctx.fillStyle='rgba(0,0,0,0.12)';
+    ctx.beginPath();ctx.ellipse(0,68,28,7,0,0,Math.PI*2);ctx.fill();
+
+    // Legs
+    ctx.fillStyle='#2c2c2c';
+    var legSwing=Math.sin(t*2)*3*(pose==='walk'?2:1);
+    ctx.fillRect(-11+legSwing*0.3,30,7,36);
+    ctx.fillRect(4-legSwing*0.3,30,7,36);
+
+    // Shoes
+    ctx.fillStyle='#1a1a1a';
+    ctx.beginPath();ctx.ellipse(-7+legSwing*0.3,66,9,4,0,0,Math.PI*2);ctx.fill();
+    ctx.beginPath();ctx.ellipse(7-legSwing*0.3,66,9,4,0,0,Math.PI*2);ctx.fill();
+    // Shoe shine
+    ctx.fillStyle='rgba(255,255,255,0.15)';
+    ctx.beginPath();ctx.ellipse(-5+legSwing*0.3,64,3,1.5,0,0,Math.PI*2);ctx.fill();
+
+    // Body
+    ctx.fillStyle='#f0f0f0';
+    ctx.beginPath();ctx.moveTo(-22,-10);ctx.quadraticCurveTo(-26,35,-14,35);ctx.lineTo(14,35);ctx.quadraticCurveTo(26,35,22,-10);ctx.closePath();ctx.fill();
+    ctx.strokeStyle='#ddd';ctx.lineWidth=0.5;ctx.stroke();
+
+    // Double-breast buttons
+    ctx.fillStyle='#888';
+    for(var i=0;i<3;i++){ctx.beginPath();ctx.arc(-6,2+i*10,1.8,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.arc(6,2+i*10,1.8,0,Math.PI*2);ctx.fill();}
+
+    // Belt
+    ctx.fillStyle='#222';ctx.fillRect(-20,22,40,3);ctx.fillStyle='#c0a030';ctx.fillRect(-3,21,6,5);
+
+    // Arms
+    var la1=pose==='wave'?-1.2:pose==='knead'?0.6:pose==='cut'?-0.3:0.1+Math.sin(t*1.5)*0.1;
+    var la2=pose==='wave'?0.5:pose==='knead'?0.7:pose==='cut'?0.8:-0.1+Math.cos(t*1.5)*0.1;
+
+    ctx.save();ctx.translate(-22,-2);ctx.rotate(la1);
+    ctx.fillStyle='#f0f0f0';ctx.beginPath();ctx.ellipse(0,16,6,16,0,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='#e8b88a';ctx.beginPath();ctx.arc(0,33,6,0,Math.PI*2);ctx.fill();
+    if(pose==='wave'){ctx.fillStyle='#e8b88a';ctx.beginPath();ctx.moveTo(0,27);ctx.lineTo(-3,23);ctx.lineTo(3,23);ctx.fill();}
+    ctx.restore();
+
+    ctx.save();ctx.translate(22,-2);ctx.rotate(la2);
+    ctx.fillStyle='#f0f0f0';ctx.beginPath();ctx.ellipse(0,16,6,16,0,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='#e8b88a';ctx.beginPath();ctx.arc(0,33,6,0,Math.PI*2);ctx.fill();
+    ctx.restore();
+
+    // Neck
+    ctx.fillStyle='#e0a878';
+    ctx.fillRect(-5,-16,10,8);
+
+    // Head
+    ctx.fillStyle='#e8b88a';
+    ctx.beginPath();ctx.arc(0,-30,17,0,Math.PI*2);ctx.fill();
+
+    // Ears
+    ctx.fillStyle='#d4a070';
+    ctx.beginPath();ctx.ellipse(-17,-30,4,6,-0.2,0,Math.PI*2);ctx.fill();
+    ctx.beginPath();ctx.ellipse(17,-30,4,6,0.2,0,Math.PI*2);ctx.fill();
+
+    // Eyes
+    var ey=mood==='dramatic'?-33:mood==='romantic'?-32:-33;
+    ctx.fillStyle='#fff';ctx.beginPath();ctx.ellipse(-7,ey,4,3.5,0,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.ellipse(7,ey,4,3.5,0,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='#3d2b1f';
+    var blink=Math.sin(t*0.7)>0.97?0.2:1;
+    ctx.beginPath();ctx.ellipse(-7,ey,2.2*blink,2.5*blink,0,0,Math.PI*2);ctx.fill();
+    ctx.beginPath();ctx.ellipse(7,ey,2.2*blink,2.5*blink,0,0,Math.PI*2);ctx.fill();
+    // Pupil highlight
+    if(blink>0.5){ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(-6,ey-1,0.8,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.arc(8,ey-1,0.8,0,Math.PI*2);ctx.fill();}
+
+    // Eyebrows
+    ctx.strokeStyle='#5a3520';ctx.lineWidth=1.5;
+    var browUp=mood==='cheerful'?-2:mood==='dramatic'?-4:0;
+    ctx.beginPath();ctx.moveTo(-10,ey-6+browUp);ctx.quadraticCurveTo(-7,ey-9+browUp,-4,ey-6+browUp);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(4,ey-6+browUp);ctx.quadraticCurveTo(7,ey-9+browUp,10,ey-6+browUp);ctx.stroke();
+
+    // Cheeks (blush)
+    if(mood==='romantic'||mood==='cheerful'){
+        ctx.fillStyle='rgba(230,130,130,0.25)';
+        ctx.beginPath();ctx.ellipse(-12,-24,5,3,0,0,Math.PI*2);ctx.fill();
+        ctx.beginPath();ctx.ellipse(12,-24,5,3,0,0,Math.PI*2);ctx.fill();
+    }
+
+    // Nose
+    ctx.fillStyle='#d4a070';ctx.beginPath();ctx.arc(0,-26,2.5,0,Math.PI*2);ctx.fill();
+
+    // Moustache (вишенки)
+    ctx.fillStyle='#b83227';
+    ctx.beginPath();
+    ctx.moveTo(-9,-23);ctx.quadraticCurveTo(-13,-19,-11,-15);ctx.quadraticCurveTo(-7,-18,0,-22);
+    ctx.quadraticCurveTo(7,-18,11,-15);ctx.quadraticCurveTo(13,-19,9,-23);
+    ctx.closePath();ctx.fill();
+    // Moustache shine
+    ctx.fillStyle='rgba(255,255,255,0.12)';
+    ctx.beginPath();ctx.ellipse(-4,-21,4,2,-0.2,0,Math.PI*2);ctx.fill();
+
+    // Mouth
+    if(mood==='happy'||mood==='cheerful'){
+        ctx.strokeStyle='#c0392b';ctx.lineWidth=1.2;
+        ctx.beginPath();ctx.arc(0,-19,4,0.2,Math.PI-0.2);ctx.stroke();
+    }else if(mood==='dramatic'){
+        ctx.fillStyle='#a02020';ctx.beginPath();ctx.ellipse(0,-18,3,2,0,0,Math.PI*2);ctx.fill();
+    }else{
+        ctx.strokeStyle='#c0392b';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(-3,-19);ctx.lineTo(3,-19);ctx.stroke();
+    }
+
+    // Chef hat
+    ctx.fillStyle='#fff';
+    ctx.beginPath();ctx.moveTo(-16,-44);ctx.quadraticCurveTo(-22,-62,-12,-72);ctx.quadraticCurveTo(0,-82,12,-72);ctx.quadraticCurveTo(22,-62,16,-44);ctx.closePath();ctx.fill();
+    ctx.fillStyle='#f8f8f0';
+    ctx.beginPath();ctx.arc(-7,-66,9,0,Math.PI*2);ctx.fill();
+    ctx.beginPath();ctx.arc(7,-66,9,0,Math.PI*2);ctx.fill();
+    ctx.beginPath();ctx.arc(0,-74,8,0,Math.PI*2);ctx.fill();
+    // Hat band
+    ctx.fillStyle='#e8e8e0';ctx.fillRect(-16,-46,32,6);
+    // Hat shadow
+    ctx.fillStyle='rgba(0,0,0,0.05)';
+    ctx.beginPath();ctx.ellipse(0,-46,14,3,0,0,Math.PI*2);ctx.fill();
+
+    ctx.restore();
+}
+
+/* ===== DRAWING HELPERS ===== */
+function drawTiles(ctx,W,H,color1,color2,countX,countY){
+    for(var i=0;i<countX;i++)for(var j=0;j<countY;j++){
+        ctx.fillStyle=(i+j)%2===0?color1:color2;
+        ctx.fillRect(i*(W/countX),j*(H/countY),W/countX,H/countY);
+    }
+}
+
+function drawWindow(ctx,x,y,w,h,t){
+    ctx.fillStyle='#87ceeb';ctx.fillRect(x,y,w,h);
+    // Sky gradient
+    var sg=ctx.createLinearGradient(x,y,x,y+h);
+    sg.addColorStop(0,'#5ba3d9');sg.addColorStop(1,'#87ceeb');
+    ctx.fillStyle=sg;ctx.fillRect(x,y,w,h);
+    // Clouds
+    ctx.fillStyle='rgba(255,255,255,0.7)';
+    var cx=((t*10)%200)-50;
+    ctx.beginPath();ctx.arc(x+cx,y+h*0.3,12,0,Math.PI*2);ctx.fill();
+    ctx.beginPath();ctx.arc(x+cx+15,y+h*0.25,10,0,Math.PI*2);ctx.fill();
+    ctx.beginPath();ctx.arc(x+cx+8,y+h*0.2,8,0,Math.PI*2);ctx.fill();
+    // Frame
+    ctx.strokeStyle='#8B4513';ctx.lineWidth=4;ctx.strokeRect(x,y,w,h);
+    ctx.beginPath();ctx.moveTo(x+w/2,y);ctx.lineTo(x+w/2,y+h);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(x,y+h/2);ctx.lineTo(x+w,y+h/2);ctx.stroke();
+    // Curtain left
+    ctx.fillStyle='rgba(180,40,40,0.65)';
+    ctx.beginPath();ctx.moveTo(x-5,y-5);
+    ctx.quadraticCurveTo(x-15+Math.sin(t*1.8)*4,y+h/2,x-5,y+h+5);
+    ctx.lineTo(x+8,y+h+5);ctx.quadraticCurveTo(x+5+Math.sin(t*1.8+1)*3,y+h/2,x+8,y-5);ctx.fill();
+    // Curtain right
+    ctx.beginPath();ctx.moveTo(x+w+5,y-5);
+    ctx.quadraticCurveTo(x+w+15+Math.sin(t*1.8+2)*4,y+h/2,x+w+5,y+h+5);
+    ctx.lineTo(x+w-8,y+h+5);ctx.quadraticCurveTo(x+w-5+Math.sin(t*1.8+3)*3,y+h/2,x+w-8,y-5);ctx.fill();
+}
+
+function drawSteam(ctx,x,y,count,t,intensity){
+    intensity=intensity||1;
+    for(var i=0;i<count;i++){
+        var sx=x+Math.sin(t*2.5+i*1.7)*12;
+        var sy=y-((t*30+i*25)%(80*intensity));
+        var a=0.25*(1-sy/(y-20))*intensity;
+        if(a<=0)continue;
+        ctx.fillStyle='rgba(255,255,255,'+clamp(a,0,0.3)+')';
+        ctx.beginPath();ctx.arc(sx,sy,5+Math.sin(t+i)*3,0,Math.PI*2);ctx.fill();
+    }
+}
+
+function drawPirozhok(ctx,x,y,s,cooked,t){
+    ctx.save();ctx.translate(x,y);ctx.scale(s,s);
+    var col=cooked?['#dbb87a','#c8a060']:['#f5e6c8','#d4b896'];
+    ctx.fillStyle=col[0];
+    ctx.beginPath();ctx.ellipse(0,0,14,9,0,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle=col[1];
+    ctx.beginPath();ctx.ellipse(0,2,12,4,0,0,Math.PI);ctx.fill();
+    // Seam
+    ctx.strokeStyle=cooked?'#b89050':'#c8a070';ctx.lineWidth=0.8;
+    ctx.beginPath();ctx.moveTo(-10,0);ctx.quadraticCurveTo(0,-5,10,0);ctx.stroke();
+    if(cooked){
+        // Shine
+        ctx.fillStyle='rgba(255,255,255,0.15)';
+        ctx.beginPath();ctx.ellipse(-4,-3,5,2.5,-0.3,0,Math.PI*2);ctx.fill();
+        // Steam
+        drawSteam(ctx,0,-12,2,t,0.5);
+    }
+    ctx.restore();
+}
+
+function drawBowl(ctx,x,y,rx,ry,fillColor,fillY){
+    ctx.fillStyle='#ddd';ctx.beginPath();ctx.ellipse(x,y,rx,ry,0,0,Math.PI*2);ctx.fill();
+    ctx.strokeStyle='#bbb';ctx.lineWidth=1.5;ctx.stroke();
+    if(fillColor){
+        ctx.fillStyle=fillColor;ctx.beginPath();ctx.ellipse(x,fillY,rx-6,ry-4,0,0,Math.PI*2);ctx.fill();
+    }
+}
+
+function drawMoodBg(ctx,W,H,mood,t){
+    if(mood==='dramatic'){
+        var g=ctx.createRadialGradient(W/2,H/2,50,W/2,H/2,W);
+        g.addColorStop(0,'#2a1a0a');g.addColorStop(1,'#0a0500');ctx.fillStyle=g;
+    }else if(mood==='romantic'){
+        var g=ctx.createLinearGradient(0,0,W,H);
+        g.addColorStop(0,'#2a1525');g.addColorStop(1,'#1a0a15');ctx.fillStyle=g;
+    }else if(mood==='calm'){
+        ctx.fillStyle='#1a2030';
+    }else{
+        var g=ctx.createLinearGradient(0,0,0,H);
+        g.addColorStop(0,'#fdf6e3');g.addColorStop(0.55,'#fdf6e3');
+        g.addColorStop(0.55,'#8B6914');g.addColorStop(1,'#6d5210');ctx.fillStyle=g;
+    }
+    ctx.fillRect(0,0,W,H);
+}
+
+function drawTable(ctx,y,h,color){
+    ctx.fillStyle=color||'#a0522d';
+    ctx.fillRect(20,y,880,h);
+    ctx.fillStyle='rgba(0,0,0,0.15)';
+    ctx.fillRect(20,y+h,880,3);
+    ctx.fillStyle='#8B4513';
+    ctx.fillRect(50,y+h,10,40);ctx.fillRect(860,y+h,10,40);
+}
+
+function fmt(s){var m=Math.floor(s/60),ss=s%60;return(m<10?'0':'')+m+':'+(ss<10?'0':'')+ss}
+
+/* ===== SCENE RENDERERS ===== */
+var SC={};
+SC[1]=function(ctx,W,H,t){
+    drawMoodBg(ctx,W,H,D.mood,t);
+    // Tiles
+    for(var i=0;i<W;i+=45)for(var j=0;j<H*0.55;j+=45){
+        ctx.fillStyle=(Math.floor(i/45)+Math.floor(j/45))%2===0?'#fdf6e3':'#f0e8d4';
+        ctx.fillRect(i,j,44,44);ctx.strokeStyle='#e8dcc8';ctx.lineWidth=0.3;ctx.strokeRect(i,j,44,44);
+    }
+    drawWindow(ctx,W-155,15,100,90,t);
+    drawTable(ctx,H-65,12,'#a0522d');
+
+    // Items
+    drawBowl(ctx,200,H-80,38,14,'#f5f0dc',H-84);
+    // Glass of water
+    ctx.fillStyle='rgba(135,206,235,0.45)';ctx.fillRect(310,H-110,16,42);
+    ctx.strokeStyle='#aaa';ctx.lineWidth=1;ctx.strokeRect(310,H-110,16,42);
+    ctx.fillStyle='rgba(255,255,255,0.2)';ctx.fillRect(312,H-108,3,38);
+    // Yeast
+    ctx.fillStyle='#f0e68c';ctx.fillRect(420,H-100,32,28);ctx.strokeStyle='#d4a030';ctx.lineWidth=1;ctx.strokeRect(420,H-100,32,28);
+    ctx.fillStyle='#555';ctx.font='bold 7px sans-serif';ctx.fillText('ДРОЖЖИ',422,H-83);
+
+    // Spoon
+    ctx.strokeStyle='#bbb';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(340,H-72);ctx.lineTo(380,H-78);ctx.stroke();
+    ctx.fillStyle='#ccc';ctx.beginPath();ctx.ellipse(338,H-70,7,4,-0.3,0,Math.PI*2);ctx.fill();
+
+    // Light
+    ctx.fillStyle='rgba(255,240,200,'+(D.light/300)+')';
+    ctx.beginPath();ctx.moveTo(W-105,105);ctx.lineTo(W-160,280);ctx.lineTo(W-50,280);ctx.fill();
+
+    // Chef
+    var wave=(t%4<2)?'wave':'idle';
+    drawChef(ctx,100+D.camX,H-115+D.camY,0.85,wave,'cheerful',t);
+};
+
+SC[2]=function(ctx,W,H,t){
+    ctx.fillStyle='#122840';ctx.fillRect(0,0,W,H);
+    // Bowl
+    drawBowl(ctx,W/2,H/2+30,130,45,null,0);
+    ctx.fillStyle='rgba(120,180,220,0.35)';ctx.beginPath();ctx.ellipse(W/2,H/2+25,120,35,0,0,Math.PI*2);ctx.fill();
+
+    // Bubbles
+    var bp=getP('bubbles');
+    if(Math.random()<0.3*D.animSpd)bp.add(W/2+Math.random()*160-80,H/2+20,Math.random()*2-1,-(1+Math.random()*2),3+Math.random()*2,'rgba(200,230,255,0.6)',2+Math.random()*2);
+    bp.update(0.16);bp.draw(ctx);
+
+    // Foam
+    ctx.fillStyle='rgba(255,255,240,0.55)';
+    ctx.beginPath();
+    for(var i=0;i<20;i++){
+        var fx=W/2-100+i*10.5;
+        var fy=H/2+5+Math.sin(t*3+i*0.8)*4;
+        if(i===0)ctx.moveTo(fx,fy);else ctx.lineTo(fx,fy);
+    }
+    ctx.lineTo(W/2+100,H/2+40);ctx.lineTo(W/2-100,H/2+40);ctx.fill();
+
+    // Towel
+    var tw=H/2-15+Math.sin(t*1.5)*5;
+    ctx.fillStyle='#f5f0dc';
+    ctx.fillRect(W/2-125,tw-4,250,14);
+    ctx.strokeStyle='#e0d8c0';ctx.lineWidth=0.5;ctx.strokeRect(W/2-125,tw-4,250,14);
+    // Towel stripes
+    ctx.fillStyle='rgba(200,50,50,0.15)';
+    ctx.fillRect(W/2-125,tw,250,2);
+
+    drawSteam(ctx,W/2,tw-10,6,t,1.2);
+
+    // Thermometer
+    ctx.fillStyle='#333';ctx.fillRect(40,H/2-30,8,60);
+    ctx.fillStyle='#ff3333';ctx.fillRect(42,H/2-20,4,35+Math.sin(t)*5);
+    ctx.fillStyle='#fff';ctx.font='10px sans-serif';ctx.fillText('38°C',35,H/2-35);
+
+    drawChef(ctx,70,H-45,0.55,'idle','cheerful',t);
+};
+
+SC[3]=function(ctx,W,H,t){
+    drawMoodBg(ctx,W,H,D.mood,t);
+    drawTable(ctx,H-55,10,'#a0522d');
+
+    // Big bowl
+    drawBowl(ctx,W/2,H-70,75,25,null,0);
+    // Dough (animated)
+    var dH=18+Math.sin(t*3)*4;
+    ctx.fillStyle='#f5e6c8';ctx.beginPath();ctx.ellipse(W/2,H-75,65,dH,0,0,Math.PI*2);ctx.fill();
+    // Dough texture
+    ctx.fillStyle='rgba(210,180,130,0.3)';
+    for(var i=0;i<5;i++){
+        ctx.beginPath();ctx.ellipse(W/2-20+i*10,H-75+Math.sin(t*2+i)*3,8,4,t*0.5+i,0,Math.PI*2);ctx.fill();
+    }
+
+    // Flour bag
+    ctx.fillStyle='#f0e68c';ctx.fillRect(W-160,H-90,45,35);
+    ctx.fillStyle='#333';ctx.font='bold 8px sans-serif';ctx.fillText('МУКА',W-155,H-70);
+    ctx.fillStyle='rgba(255,255,255,0.3)';ctx.fillRect(W-158,H-88,41,1);
+
+    // Oil bottle
+    ctx.fillStyle='rgba(210,190,60,0.5)';ctx.fillRect(65,H-105,14,50);
+    ctx.fillStyle='#654321';ctx.fillRect(68,H-115,8,12);
+
+    // Sugar bowl
+    ctx.fillStyle='#eee';ctx.beginPath();ctx.ellipse(150,H-60,15,8,0,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='#fff';ctx.font='6px sans-serif';ctx.fillText('САХАР',140,H-58);
+
+    // Salt
+    ctx.fillStyle='#ddd';ctx.fillRect(180,H-70,10,12);ctx.fillStyle='#888';ctx.font='5px sans-serif';ctx.fillText('СОЛЬ',178,H-62);
+
+    // Flour particles
+    var fp=getP('flour');
+    if(Math.random()<0.2*D.animSpd&&Math.sin(t*4)>0)fp.add(W/2+Math.random()*60-30,H-100,Math.random()*2-1,-(0.5+Math.random()*2),1.5,'rgba(255,255,255,0.5)',1.5);
+    fp.update(0.16);fp.draw(ctx);
+
+    drawChef(ctx,W/2,H-135,0.7,'knead','cheerful',t);
+};
+
+SC[4]=function(ctx,W,H,t){
+    ctx.fillStyle='#1e1028';ctx.fillRect(0,0,W,H);
+    // Table
+    drawTable(ctx,H-50,8,'#6d4c2a');
+
+    // Bowl
+    drawBowl(ctx,W/2,H-58,65,22,null,0);
+    // Rising dough
+    var rise=clamp(t/8,0,1);
+    var dh=15+rise*35;
+    ctx.fillStyle='#f5e6c8';ctx.beginPath();ctx.ellipse(W/2,H-63-dh/2,58,dh/2+5,0,0,Math.PI*2);ctx.fill();
+    // Towel (lifting)
+    if(rise>0.3){
+        ctx.fillStyle='rgba(245,245,220,'+clamp(rise*1.5,0,0.8)+')';
+        ctx.fillRect(W/2-63,H-68-dh-4,126,10);
+    }
+
+    // Sunbeam through window
+    var sunX=W-200+Math.sin(t*0.3)*30;
+    ctx.fillStyle='rgba(255,255,200,'+(0.04+Math.sin(t*0.5)*0.02)+')';
+    ctx.beginPath();ctx.moveTo(sunX,0);ctx.lineTo(sunX-80,H);ctx.lineTo(sunX+80,H);ctx.fill();
+
+    // Book
+    ctx.fillStyle='#8B0000';ctx.fillRect(70,H-88,48,38);
+    ctx.fillStyle='#ffd700';ctx.font='bold 6px sans-serif';
+    ctx.fillText('ТАЙНЫ',77,H-73);ctx.fillText('ХЛЕБО',77,H-65);ctx.fillText('ПЕЧЕНИЯ',77,H-57);
+
+    // Chair
+    ctx.fillStyle='#654321';ctx.fillRect(68,H-55,40,55);ctx.fillRect(63,H-55,50,5);
+
+    // Clock
+    ctx.fillStyle='#f8f8f0';ctx.beginPath();ctx.arc(W-70,45,22,0,Math.PI*2);ctx.fill();
+    ctx.strokeStyle='#333';ctx.lineWidth=2;ctx.stroke();
+    var ca=t*0.15%(Math.PI*2);
+    ctx.strokeStyle='#333';ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(W-70,45);ctx.lineTo(W-70+Math.cos(ca)*14,45+Math.sin(ca)*14);ctx.stroke();
+    ctx.fillStyle='#e94560';ctx.beginPath();ctx.arc(W-70,45,2,0,Math.PI*2);ctx.fill();
+
+    drawChef(ctx,88,H-100,0.48,'idle','calm',t);
+};
+
+SC[5]=function(ctx,W,H,t){
+    drawMoodBg(ctx,W,H,D.mood,t);
+    drawTable(ctx,H-55,10,'#a0522d');
+
+    // Stove
+    ctx.fillStyle='#3a3a3a';ctx.fillRect(350,H-100,200,70);
+    ctx.fillStyle='#2a2a2a';ctx.fillRect(360,H-90,75,40);ctx.fillRect(445,H-90,75,40);
+    // Burner glow
+    var glow=0.4+Math.sin(t*3)*0.15;
+    ctx.fillStyle='rgba(255,80,0,'+glow+')';
+    ctx.beginPath();ctx.ellipse(397,H-70,25,8,0,0,Math.PI*2);ctx.fill();
+
+    // Pan
+    ctx.fillStyle='#555';ctx.beginPath();ctx.ellipse(397,H-68,42,14,0,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='#444';ctx.fillRect(437,H-74,30,6);
+    // Pan reflection
+    ctx.fillStyle='rgba(255,255,255,0.08)';ctx.beginPath();ctx.ellipse(390,H-72,20,5,-0.2,0,Math.PI*2);ctx.fill();
+
+    // Meat in pan
+    ctx.fillStyle='#8B4513';ctx.beginPath();ctx.ellipse(390,H-68,18,6,0,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='#a0522d';ctx.beginPath();ctx.ellipse(405,H-65,12,5,0.3,0,Math.PI*2);ctx.fill();
+
+    // Sizzle particles
+    var sp=getP('sizzle');
+    if(Math.random()<0.4*D.animSpd)sp.add(380+Math.random()*40,H-80,Math.random()*2-1,-(2+Math.random()*3),1,'rgba(255,200,50,0.7)',1.5);
+    sp.update(0.16);sp.draw(ctx);
+
+    // Cutting board
+    ctx.fillStyle='#c8a96e';ctx.fillRect(50,H-65,110,10);ctx.strokeStyle='#b0955a';ctx.strokeRect(50,H-65,110,10);
+
+    // Knife
+    ctx.fillStyle='#999';ctx.fillRect(168,H-80,3,30);
+    ctx.fillStyle='#654321';ctx.fillRect(165,H-83,10,6);
+    // Knife edge shine
+    ctx.fillStyle='rgba(255,255,255,0.3)';ctx.fillRect(168,H-78,1,25);
+
+    // Onion halves
+    ctx.fillStyle='#ffe4b5';
+    ctx.beginPath();ctx.arc(80,H-70,10,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='#f5deb3';ctx.beginPath();ctx.arc(80,H-70,7,0,Math.PI*2);ctx.fill();
+    ctx.beginPath();ctx.arc(120,H-72,9,0,Math.PI*2);ctx.fill();
+
+    // Herbs
+    ctx.fillStyle='#228B22';
+    for(var i=0;i<4;i++){ctx.fillRect(195+i*8,H-58+Math.sin(t+i)*2,3,14);}
+
+    // Pepper grinder
+    ctx.fillStyle='#333';ctx.fillRect(230,H-95,10,35);
+    ctx.fillStyle='#555';ctx.fillRect(228,H-100,14,8);
+
+    // Chef
+    drawChef(ctx,280+D.camX,H-125+D.camY,0.65,'cut','cheerful',t);
+};
+
+SC[6]=function(ctx,W,H,t){
+    drawMoodBg(ctx,W,H,D.mood,t);
+    drawTable(ctx,H-55,10,'#c8a96e');
+
+    // Rolling pin
+    var rp=Math.sin(t*2.5)*20;
+    ctx.fillStyle='#a06830';ctx.beginPath();ctx.ellipse(230+rp,H-75,35,6,0,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='#7a4820';ctx.beginPath();ctx.arc(193+rp,H-75,7,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.arc(267+rp,H-75,7,0,Math.PI*2);ctx.fill();
+    // Pin shine
+    ctx.fillStyle='rgba(255,255,255,0.1)';ctx.fillRect(200+rp,H-78,60,2);
+
+    // Lepeshka
+    ctx.fillStyle='#f5e6c8';
+    ctx.beginPath();ctx.ellipse(400,H-65,32+Math.sin(t*2)*2,13,0,0,Math.PI*2);ctx.fill();
+    // Dough texture
+    ctx.strokeStyle='rgba(210,180,130,0.3)';ctx.lineWidth=0.5;
+    ctx.beginPath();ctx.ellipse(400,H-65,25,9,0.1,0,Math.PI*2);ctx.stroke();
+
+    // Filling
+    ctx.fillStyle='#8B4513';ctx.beginPath();ctx.arc(400,H-67,9,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='#a0522d';ctx.beginPath();ctx.arc(400,H-67,6,0,Math.PI*2);ctx.fill();
+    // Herb specks
+    ctx.fillStyle='#2d5a1e';ctx.beginPath();ctx.arc(398,H-68,1.5,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.arc(403,H-66,1,0,Math.PI*2);ctx.fill();
+
+    // Tray
+    ctx.fillStyle='#e8e0d0';ctx.fillRect(530,H-75,250,30);ctx.strokeStyle='#ccc';ctx.lineWidth=1;ctx.strokeRect(530,H-75,250,30);
+
+    // Pirozhki on tray
+    for(var i=0;i<8;i++){
+        drawPirozhok(ctx,560+i*28,H-60,0.9,false,t);
+    }
+
+    // Weighing scale
+    ctx.fillStyle='#888';ctx.fillRect(700,H-95,2,25);
+    ctx.fillStyle='#555';ctx.fillRect(690,H-95,22,3);
+    ctx.fillStyle='#eee';ctx.beginPath();ctx.ellipse(701,H-80,15,5,0,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='#333';ctx.font='bold 7px Courier New';ctx.fillText('60g',692,H-77);
+
+    // Flour dust
+    var fd=getP('flourDust');
+    if(Math.random()<0.15*D.animSpd)fd.add(350+Math.random()*100,H-85,Math.random()*0.5-0.25,-(0.3+Math.random()),2,'rgba(255,255,255,0.35)',1);
+    fd.update(0.16);fd.draw(ctx);
+
+    drawChef(ctx,470+D.camX,H-125+D.camY,0.65,'knead','cheerful',t);
+};
+
+SC[7]=function(ctx,W,H,t){
+    // Dark warm bg
+    var g=ctx.createRadialGradient(460,120,30,460,120,400);
+    g.addColorStop(0,'rgba(255,120,30,0.15)');g.addColorStop(1,'#0a0500');ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+
+    // Oven body
+    ctx.fillStyle='#2a2a2a';ctx.fillRect(300,30,280,190);
+    ctx.fillStyle='#1a1a1a';ctx.fillRect(310,40,260,120);
+
+    // Oven glow
+    var oGlow=0.25+Math.sin(t*1.5)*0.1;
+    var og=ctx.createRadialGradient(440,100,10,440,100,120);
+    og.addColorStop(0,'rgba(255,120,30,'+oGlow+')');og.addColorStop(1,'rgba(255,60,0,0.05)');
+    ctx.fillStyle=og;ctx.fillRect(315,45,250,110);
+
+    // Oven rack
+    ctx.strokeStyle='#555';ctx.lineWidth=1;
+    for(var i=0;i<4;i++){ctx.beginPath();ctx.moveTo(320,70+i*20);ctx.lineTo(560,70+i*20);ctx.stroke();}
+
+    // Pirozhki in oven (growing)
+    var grow=clamp(t/4,0,1);
+    for(var i=0;i<6;i++){
+        var px=345+i*38;
+        var py=85+Math.sin(t+i)*3;
+        var col='rgb('+(200+grow*55|0)+','+(150+grow*65|0)+','+(80+grow*25|0)+')';
+        ctx.fillStyle=col;
+        ctx.beginPath();ctx.ellipse(px,py,11+grow*2,7+grow*2,0,0,Math.PI*2);ctx.fill();
+        // Shine
+        if(grow>0.5){
+            ctx.fillStyle='rgba(255,255,255,'+(grow*0.15)+')';
+            ctx.beginPath();ctx.ellipse(px-3,py-2,4,2,-0.3,0,Math.PI*2);ctx.fill();
+        }
+    }
+
+    // Oven handle
+    ctx.fillStyle='#777';ctx.fillRect(380,155,100,7);ctx.fillStyle='#999';ctx.fillRect(420,154,20,3);
+
+    // Oven knobs
+    ctx.fillStyle='#ff0';ctx.beginPath();ctx.arc(330,170,5,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='#0a0';ctx.beginPath();ctx.arc(355,170,5,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='#ff3333';ctx.beginPath();ctx.arc(380,170,5,0,Math.PI*2);ctx.fill();
+
+    // Temp display
+    ctx.fillStyle='#000';ctx.fillRect(450,160,50,18);
+    ctx.fillStyle='#0f0';ctx.font='bold 11px Courier New';ctx.fillText('180°C',453,174);
+
+    // Steam from oven vent
+    drawSteam(ctx,440,30,5,t,0.8);
+
+    // Kitchen tiles behind
+    for(var i=0;i<300;i+=40)for(var j=0;j<40;j+=40){
+        ctx.fillStyle='rgba(255,255,255,0.02)';
+        ctx.fillRect(i,j,39,39);
+    }
+
+    // Chef watching
+    drawChef(ctx,130+D.camX,H-55+D.camY,0.6,'idle','cheerful',t);
+};
+
+SC[8]=function(ctx,W,H,t){
+    var g=ctx.createLinearGradient(0,0,0,H);
+    g.addColorStop(0,'#fff8dc');g.addColorStop(1,'#faebd7');ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+
+    // Lace tablecloth pattern
+    ctx.strokeStyle='rgba(200,180,160,0.15)';ctx.lineWidth=0.5;
+    for(var i=0;i<W;i+=20)for(var j=H-55;j<H;j+=10){
+        ctx.beginPath();ctx.arc(i,j,3,0,Math.PI*2);ctx.stroke();
+    }
+
+    drawTable(ctx,H-55,8,'#c8a96e');
+
+    // Tray
+    ctx.fillStyle='#f0e8d8';ctx.fillRect(60,H-85,280,35);ctx.strokeStyle='#ddd';ctx.strokeRect(60,H-85,280,35);
+
+    // Pirozhki on tray
+    for(var i=0;i<8;i++) drawPirozhok(ctx,95+i*30,H-68,0.95,true,t);
+
+    // Cut pirozhok (large, close-up)
+    ctx.save();ctx.translate(550,H-75);ctx.scale(2.5,2.5);
+    // Bottom half
+    ctx.fillStyle='#dbb87a';ctx.beginPath();ctx.ellipse(0,4,16,8,0,0,Math.PI);ctx.fill();
+    // Top half
+    ctx.fillStyle='#f5e6c8';ctx.beginPath();ctx.ellipse(0,4,16,8,0,Math.PI,Math.PI*2);ctx.fill();
+    // Filling
+    ctx.fillStyle='#8B4513';ctx.beginPath();ctx.ellipse(0,2,10,6,0,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='#a0522d';ctx.beginPath();ctx.ellipse(-2,1,6,3,0,0,Math.PI*2);ctx.fill();
+    // Herbs in filling
+    ctx.fillStyle='#2d5a1e';ctx.beginPath();ctx.arc(2,2,1,0,Math.PI*2);ctx.fill();
+    // Crumb structure
+    ctx.fillStyle='rgba(255,255,200,0.3)';
+    for(var i=0;i<5;i++){ctx.beginPath();ctx.arc(-8+i*4,8+Math.sin(i)*2,1.5,0,Math.PI*2);ctx.fill();}
+    // Steam
+    drawSteam(ctx,0,-8,3,t,0.6);
+    ctx.restore();
+
+    // Knife
+    ctx.fillStyle='#ccc';ctx.fillRect(580,H-100,3,40);
+    ctx.fillStyle='#654321';ctx.fillRect(577,H-105,10,7);
+
+    // Plate
+    ctx.fillStyle='#fff';ctx.beginPath();ctx.ellipse(730,H-65,45,15,0,0,Math.PI*2);ctx.fill();
+    ctx.strokeStyle='#ddd';ctx.lineWidth=1;ctx.stroke();
+    ctx.fillStyle='#f8f8f0';ctx.beginPath();ctx.ellipse(730,H-67,35,11,0,0,Math.PI*2);ctx.fill();
+
+    // Hearts
+    if(D.mood==='romantic'||D.mood==='cheerful'){
+        for(var h=0;h<4;h++){
+            var hx=680+h*25;
+            var hy=H-160-Math.abs(Math.sin(t*1.5+h*0.8))*25;
+            ctx.fillStyle='rgba(230,50,50,'+(0.3+h*0.1)+')';
+            ctx.font=(12+h*3)+'px sans-serif';ctx.fillText('\u2764',hx,hy);
+        }
+    }
+
+    drawChef(ctx,780+D.camX,H-110+D.camY,0.7,'wave','cheerful',t);
+};
+
+/* ===== INTRO CHEF ===== */
+function drawIntro(){
+    var c=document.getElementById('introC');if(!c)return;
+    var ctx=c.getContext('2d');ctx.clearRect(0,0,240,240);
+    // bg circle
+    var g=ctx.createRadialGradient(120,120,30,120,120,110);
+    g.addColorStop(0,'#2a1a3a');g.addColorStop(1,'#0a0510');ctx.fillStyle=g;
+    ctx.beginPath();ctx.arc(120,120,110,0,Math.PI*2);ctx.fill();
+    drawChef(ctx,120,195,1.3,'wave','cheerful',0);
+}
+
+/* ===== MAIN ENGINE ===== */
+var T=0,running=false,spd=1,iv=null;
+var TOTAL=900;
+var SCENES=[
+    {id:'s1',cid:'c1',t0:0,t1:90,lid:'l1'},
+    {id:'s2',cid:'c2',t0:90,t1:240,lid:'l2'},
+    {id:'s3',cid:'c3',t0:240,t1:420,lid:'l3'},
+    {id:'s4',cid:'c4',t0:420,t1:540,lid:'l4'},
+    {id:'s5',cid:'c5',t0:540,t1:660,lid:'l5'},
+    {id:'s6',cid:'c6',t0:660,t1:780,lid:'l6'},
+    {id:'s7',cid:'c7',t0:780,t1:870,lid:'l7'},
+    {id:'s8',cid:'c8',t0:870,t1:900,lid:'l8'}
+];
+var EPIS=[
+    {id:'ep0',t:0},{id:'ep1',t:90},{id:'ep2',t:240},{id:'ep3',t:420},
+    {id:'ep4',t:540},{id:'ep5',t:660},{id:'ep6',t:780},{id:'ep7',t:870}
+];
+var ctxCache={};
+function getC(id){
+    if(!ctxCache[id]){var c=document.getElementById(id);if(!c)return null;ctxCache[id]={c:c,x:c.getContext('2d')};}
+    return ctxCache[id];
+}
+
+function tick(){
+    document.getElementById('clock').textContent=fmt(T);
+    document.getElementById('introClock').textContent=fmt(T);
+    document.getElementById('pf').style.width=(T/TOTAL*100)+'%';
+
+    var animT=D.animSpd/10;
+
+    SCENES.forEach(function(sc){
+        var el=document.getElementById(sc.id);
+        var la=document.getElementById(sc.lid);
+        if(T>=sc.t0&&T<sc.t1){
+            if(el.style.display!=='block')el.style.display='block';
+            el.classList.add('on');
+            la.classList.remove('on');
+            var info=getC(sc.cid);
+            if(info&&SC[sc.id.split('s')[1]]){
+                info.x.clearRect(0,0,info.c.width,info.c.height);
+                var localT=(T-sc.t0)/(sc.t1-sc.t0);
+                SC[sc.id.split('s')[1]](info.x,info.c.width,info.c.height,localT*12*animT);
             }
+        }else{
+            if(T>=sc.t1&&T<sc.t1+3){
+                if(!la.classList.contains('on')){la.classList.add('on');showLov();}
+            }else{la.classList.remove('on');}
+            if(T>=sc.t1+5)el.style.display='none';
         }
+    });
 
-        function playLaughSound() {
-            initAudio();
-            // Create a simple laugh-like sound effect
-            const oscillator = audioCtx.createOscillator();
-            const gainNode = audioCtx.createGain();
+    EPIS.forEach(function(ep){
+        document.getElementById(ep.id).style.display=(T>=ep.t&&T<ep.t+8)?'block':'none';
+    });
 
-            oscillator.connect(gainNode);
-            gainNode.connect(audioCtx.destination);
+    if(T>=TOTAL){document.getElementById('finScr').style.display='block';stop();}
+}
 
-            oscillator.frequency.setValueAtTime(800, audioCtx.currentTime);
-            oscillator.frequency.exponentialRampToValueAtTime(400, audioCtx.currentTime + 0.1);
-            oscillator.frequency.exponentialRampToValueAtTime(600, audioCtx.currentTime + 0.2);
-            oscillator.frequency.exponentialRampToValueAtTime(300, audioCtx.currentTime + 0.3);
+function go(){if(running)return;running=true;iv=setInterval(function(){T++;tick()},1000/spd)}
+function stop(){running=false;clearInterval(iv)}
+function back(){stop();T=Math.max(0,T-10);tick()}
+function fast(){var spds=[1,2,4,8,0.5];var i=spds.indexOf(spd);spd=spds[(i+1)%spds.length];document.getElementById('spd').textContent=spd+'x';if(running){stop();go();}}
+function showLov(){var o=document.getElementById('lov');o.classList.add('on');setTimeout(function(){o.classList.remove('on')},2500)}
 
-            gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
-            gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
+document.getElementById('startBtn').onclick=function(){document.getElementById('intro').style.display='none';go();};
+document.onkeydown=function(e){
+    if(e.code==='Space'){e.preventDefault();running?stop():go();}
+    if(e.code==='ArrowRight'){T=Math.min(T+30,TOTAL);tick();}
+    if(e.code==='ArrowLeft'){T=Math.max(T-30,0);tick();}
+    if(e.code==='KeyD')toggleDir();
+};
 
-            oscillator.start(audioCtx.currentTime);
-            oscillator.stop(audioCtx.currentTime + 0.4);
-        }
-
-        function playBubbleSound() {
-            initAudio();
-            const oscillator = audioCtx.createOscillator();
-            const gainNode = audioCtx.createGain();
-
-            oscillator.connect(gainNode);
-            gainNode.connect(audioCtx.destination);
-
-            oscillator.type = 'sine';
-            oscillator.frequency.setValueAtTime(200 + Math.random() * 200, audioCtx.currentTime);
-            oscillator.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.1);
-
-            gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
-            gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.15);
-
-            oscillator.start(audioCtx.currentTime);
-            oscillator.stop(audioCtx.currentTime + 0.15);
-        }
-
-        function playTimerSound() {
-            initAudio();
-            const oscillator = audioCtx.createOscillator();
-            const gainNode = audioCtx.createGain();
-
-            oscillator.connect(gainNode);
-            gainNode.connect(audioCtx.destination);
-
-            oscillator.type = 'square';
-            oscillator.frequency.setValueAtTime(1000, audioCtx.currentTime);
-
-            gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
-            gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
-
-            oscillator.start(audioCtx.currentTime);
-            oscillator.stop(audioCtx.currentTime + 0.1);
-        }
-
-        function playSizzleSound() {
-            initAudio();
-            const bufferSize = audioCtx.sampleRate * 0.5;
-            const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
-            const data = buffer.getChannelData(0);
-
-            for (let i = 0; i < bufferSize; i++) {
-                data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (bufferSize * 0.3));
-            }
-
-            const source = audioCtx.createBufferSource();
-            source.buffer = buffer;
-
-            const filter = audioCtx.createBiquadFilter();
-            filter.type = 'highpass';
-            filter.frequency.value = 3000;
-
-            const gainNode = audioCtx.createGain();
-            gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
-            gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
-
-            source.connect(filter);
-            filter.connect(gainNode);
-            gainNode.connect(audioCtx.destination);
-
-            source.start();
-        }
-
-        function playCrunchSound() {
-            initAudio();
-            const bufferSize = audioCtx.sampleRate * 0.2;
-            const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
-            const data = buffer.getChannelData(0);
-
-            for (let i = 0; i < bufferSize; i++) {
-                data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (bufferSize * 0.1));
-            }
-
-            const source = audioCtx.createBufferSource();
-            source.buffer = buffer;
-
-            const gainNode = audioCtx.createGain();
-            gainNode.gain.setValueAtTime(0.2, audioCtx.currentTime);
-
-            source.connect(gainNode);
-            gainNode.connect(audioCtx.destination);
-
-            source.start();
-        }
-
-        // Movie State
-        let isPlaying = false;
-        let currentScene = 0;
-        let currentTime = 0;
-        let playSpeed = 1;
-        let timerInterval = null;
-        let sceneTimeout = null;
-
-        const totalDuration = 900; // 15 minutes in seconds
-        const scenes = [
-            { id: 'scene1', start: 0, end: 90, laugh: 'laugh1' },
-            { id: 'scene2', start: 90, end: 240, laugh: 'laugh2' },
-            { id: 'scene3', start: 240, end: 420, laugh: 'laugh3' },
-            { id: 'scene4', start: 420, end: 540, laugh: 'laugh4' },
-            { id: 'scene5', start: 540, end: 660, laugh: 'laugh5' },
-            { id: 'scene6', start: 660, end: 780, laugh: 'laugh6' },
-            { id: 'scene7', start: 780, end: 870, laugh: 'laugh7' },
-            { id: 'scene8', start: 870, end: 900, laugh: 'laugh8' }
-        ];
-
-        const episodes = [
-            { id: 'ep0', time: 0 },
-            { id: 'ep1', time: 90 },
-            { id: 'ep2', time: 240 },
-            { id: 'ep3', time: 420 },
-            { id: 'ep4', time: 540 },
-            { id: 'ep5', time: 660 },
-            { id: 'ep6', time: 780 },
-            { id: 'ep7', time: 870 }
-        ];
-
-        function formatTime(seconds) {
-            const mins = Math.floor(seconds / 60);
-            const secs = seconds % 60;
-            return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
-        }
-
-        function updateTimer() {
-            document.getElementById('mainTimer').textContent = formatTime(currentTime);
-
-            const progress = (currentTime / totalDuration) * 100;
-            document.getElementById('progressFill').style.width = progress + '%';
-
-            // Update active scene
-            scenes.forEach(scene => {
-                const sceneEl = document.getElementById(scene.id);
-                if (currentTime >= scene.start && currentTime < scene.end) {
-                    sceneEl.classList.add('active');
-                } else {
-                    sceneEl.classList.remove('active');
-                }
-            });
-
-            // Update episode markers
-            episodes.forEach(ep => {
-                const epEl = document.getElementById(ep.id);
-                if (currentTime >= ep.time && currentTime < ep.time + 10) {
-                    epEl.classList.add('show');
-                } else if (currentTime >= ep.time + 10) {
-                    epEl.classList.remove('show');
-                }
-            });
-
-            // Check for scene end - trigger laugh
-            scenes.forEach(scene => {
-                if (currentTime === scene.end - 1) {
-                    triggerLaugh(scene.laugh);
-                }
-            });
-
-            // Check for fast-forward moments
-            if (currentTime === 180 || currentTime === 330 || currentTime === 450 ||
-                currentTime === 570 || currentTime === 690 || currentTime === 810) {
-                document.getElementById('mainTimer').classList.add('timer-fast');
-                playTimerSound();
-                setTimeout(() => {
-                    document.getElementById('mainTimer').classList.remove('timer-fast');
-                }, 2000);
-            }
-
-            // Play specific sounds
-            if (currentTime === 120) playBubbleSound();
-            if (currentTime === 150) playBubbleSound();
-            if (currentTime === 570) playSizzleSound();
-            if (currentTime === 870) playCrunchSound();
-        }
-
-        function triggerLaugh(laughId) {
-            const laughEl = document.getElementById(laughId);
-            laughEl.classList.add('show');
-            playLaughSound();
-
-            // Show overlay
-            const overlay = document.getElementById('laughOverlay');
-            overlay.classList.add('show');
-
-            setTimeout(() => {
-                laughEl.classList.remove('show');
-                overlay.classList.remove('show');
-            }, 3000);
-        }
-
-        function playMovie() {
-            if (isPlaying) return;
-            isPlaying = true;
-
-            initAudio();
-
-            timerInterval = setInterval(() => {
-                if (currentTime < totalDuration) {
-                    currentTime++;
-                    updateTimer();
-                } else {
-                    pauseMovie();
-                }
-            }, 1000 / playSpeed);
-        }
-
-        function pauseMovie() {
-            isPlaying = false;
-            clearInterval(timerInterval);
-        }
-
-        function resetMovie() {
-            pauseMovie();
-            currentTime = 0;
-            updateTimer();
-
-            scenes.forEach(scene => {
-                document.getElementById(scene.id).classList.remove('active');
-            });
-
-            episodes.forEach(ep => {
-                document.getElementById(ep.id).classList.remove('show');
-            });
-
-            document.querySelectorAll('.laugh-track').forEach(el => {
-                el.classList.remove('show');
-            });
-        }
-
-        function changeSpeed() {
-            const speeds = [1, 2, 4, 8, 0.5];
-            const currentIndex = speeds.indexOf(playSpeed);
-            playSpeed = speeds[(currentIndex + 1) % speeds.length];
-            document.getElementById('speedValue').textContent = playSpeed + 'x';
-
-            if (isPlaying) {
-                pauseMovie();
-                playMovie();
-            }
-        }
-
-        // Generate bubbles for scene 2
-        function generateBubbles() {
-            const container = document.getElementById('bubbles1');
-            for (let i = 0; i < 20; i++) {
-                const bubble = document.createElement('div');
-                bubble.className = 'bubble';
-                bubble.style.left = Math.random() * 100 + '%';
-                bubble.style.width = (Math.random() * 20 + 10) + 'px';
-                bubble.style.height = bubble.style.width;
-                bubble.style.animationDelay = Math.random() * 2 + 's';
-                bubble.style.animationDuration = (Math.random() * 2 + 1) + 's';
-                container.appendChild(bubble);
-            }
-        }
-
-        // Initialize
-        generateBubbles();
-        updateTimer();
-
-        // Keyboard shortcuts
-        document.addEventListener('keydown', (e) => {
-            switch(e.code) {
-                case 'Space':
-                    e.preventDefault();
-                    isPlaying ? pauseMovie() : playMovie();
-                    break;
-                case 'ArrowRight':
-                    currentTime = Math.min(currentTime + 10, totalDuration);
-                    updateTimer();
-                    break;
-                case 'ArrowLeft':
-                    currentTime = Math.max(currentTime - 10, 0);
-                    updateTimer();
-                    break;
-                case 'KeyR':
-                    resetMovie();
-                    break;
-                case 'KeyS':
-                    changeSpeed();
-                    break;
-            }
-        });
-    </script>
+drawIntro();tick();
+</script>
 </body>
 </html>
