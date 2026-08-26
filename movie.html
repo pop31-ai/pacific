@@ -320,7 +320,7 @@ body{background:#0d0d1a;color:#fff;font-family:'Segoe UI',sans-serif;overflow-x:
 
 <script>
 var D={camX:0,camY:0,light:80,mood:'cheerful',animSpd:10};
-function dirUpdate(){D.camX=+document.getElementById('camX').value;D.camY=+document.getElementById('camY').value;D.light=+document.getElementById('light').value;D.mood=document.getElementById('mood').value;D.animSpd=+document.getElementById('animSpd').value}
+function dirUpdate(){D.light=+document.getElementById('light').value;D.mood=document.getElementById('mood').value;D.animSpd=+document.getElementById('animSpd').value;D.dirOverride=true;camLerp.camX=+document.getElementById('camX').value;camLerp.camY=+document.getElementById('camY').value}
 function toggleDir(){var p=document.getElementById('dirPanel');p.classList.toggle('on')}
 
 function clamp(v,a,b){return Math.max(a,Math.min(b,v))}
@@ -452,9 +452,99 @@ var CAMS={
         {id:'face',icon:'😋',name:'Реакция',desc:'Улыбка шефа',camX:-20,camY:-5,zoom:1.2}
     ]
 };
+
+/* ===== CAMERA KEYFRAMES (dynamic moves within scenes) ===== */
+var CAM_KEYS={
+    1:[
+        {t:0,  camX:0, camY:0, zoom:0.8},
+        {t:0.15,camX:-10,camY:-8,zoom:1.1},
+        {t:0.35,camX:0, camY:-5, zoom:1.3},
+        {t:0.55,camX:5, camY:-3, zoom:1.0},
+        {t:0.8, camX:0, camY:0,  zoom:0.9}
+    ],
+    2:[
+        {t:0,  camX:0, camY:0, zoom:0.9},
+        {t:0.2, camX:0, camY:-15,zoom:1.5},
+        {t:0.45,camX:0, camY:-10,zoom:1.8},
+        {t:0.7, camX:5, camY:-5, zoom:1.2},
+        {t:0.9, camX:0, camY:0,  zoom:0.9}
+    ],
+    3:[
+        {t:0,  camX:0, camY:0, zoom:0.9},
+        {t:0.15,camX:0, camY:-8, zoom:1.2},
+        {t:0.35,camX:0, camY:-5, zoom:1.5},
+        {t:0.55,camX:-5, camY:-3, zoom:1.1},
+        {t:0.8, camX:0, camY:0,  zoom:1.0}
+    ],
+    4:[
+        {t:0,  camX:0, camY:0, zoom:0.85},
+        {t:0.3, camX:0, camY:-5, zoom:1.0},
+        {t:0.6, camX:-20,camY:0, zoom:1.1},
+        {t:0.85,camX:0, camY:-3, zoom:1.2}
+    ],
+    5:[
+        {t:0,  camX:-20,camY:-5,zoom:1.1},
+        {t:0.2, camX:-10,camY:-8,zoom:1.3},
+        {t:0.4, camX:15, camY:-10,zoom:1.4},
+        {t:0.6, camX:20, camY:-12,zoom:1.5},
+        {t:0.8, camX:0,  camY:-5, zoom:1.0}
+    ],
+    6:[
+        {t:0,  camX:0, camY:0, zoom:0.9},
+        {t:0.2, camX:-5, camY:-8,zoom:1.3},
+        {t:0.45,camX:5,  camY:-10,zoom:1.6},
+        {t:0.65,camX:15, camY:-3, zoom:1.2},
+        {t:0.85,camX:25, camY:0,  zoom:0.9}
+    ],
+    7:[
+        {t:0,  camX:0, camY:0, zoom:0.9},
+        {t:0.2, camX:0, camY:-8, zoom:1.3},
+        {t:0.45,camX:0, camY:-12,zoom:1.5},
+        {t:0.7, camX:-10,camY:-5, zoom:1.1},
+        {t:0.9, camX:0, camY:0,  zoom:0.9}
+    ],
+    8:[
+        {t:0,  camX:0, camY:0, zoom:0.9},
+        {t:0.2, camX:10, camY:-10,zoom:1.6},
+        {t:0.45,camX:10, camY:-15,zoom:1.8},
+        {t:0.65,camX:-15,camY:-5, zoom:1.1},
+        {t:0.85,camX:-20,camY:-3, zoom:1.2}
+    ]
+};
+
+/* ===== CAMERA STATE ===== */
 var camState={};
-function initCam(){for(var i=1;i<=8;i++)camState[i]=0}
+var camLerp={camX:0,camY:0,zoom:1};
+var LERP_SPEED=0.05;
+function initCam(){for(var i=1;i<=8;i++)camState[i]=0;camLerp={camX:0,camY:0,zoom:1};}
 initCam();
+
+function lerpVal(a,b,t){return a+(b-a)*t}
+
+function getCamTarget(sceneNum,localT){
+    var keys=CAM_KEYS[sceneNum];
+    if(!keys||keys.length===0)return null;
+    var idx=0;
+    for(var i=0;i<keys.length-1;i++){
+        if(localT>=keys[i].t&&localT<keys[i+1].t){idx=i;break;}
+        if(i===keys.length-2)idx=i;
+    }
+    var k0=keys[idx],k1=keys[Math.min(idx+1,keys.length-1)];
+    var segT=(k1.t===k0.t)?0:clamp((localT-k0.t)/(k1.t-k0.t),0,1);
+    segT=segT*segT*(3-2*segT);
+    return{
+        camX:lerpVal(k0.camX,k1.camX,segT),
+        camY:lerpVal(k0.camY,k1.camY,segT),
+        zoom:lerpVal(k0.zoom,k1.zoom,segT)
+    };
+}
+
+function updateCamLerp(target){
+    if(!target)return;
+    camLerp.camX=lerpVal(camLerp.camX,target.camX,LERP_SPEED);
+    camLerp.camY=lerpVal(camLerp.camY,target.camY,LERP_SPEED);
+    camLerp.zoom=lerpVal(camLerp.zoom,target.zoom,LERP_SPEED);
+}
 
 /* ===== SCENE PICKER (between scenes) ===== */
 var spTimer=null;
@@ -481,13 +571,15 @@ function showScenePicker(sceneNum){
     cams.forEach(function(c,i){
         var card=document.createElement('div');
         card.className='sp-card'+(camState[sceneNum]===i?' active':'');
-        card.innerHTML='<span class="spc-icon">'+c.icon+'</span><span class="spc-name">'+c.name+'</span><span class="spc-desc">'+c.desc+'</span>';
+        var pvId='pv_'+sceneNum+'_'+i;
+        card.innerHTML='<canvas id="'+pvId+'" width="160" height="100" style="border-radius:8px;margin-bottom:6px;width:160px;height:100px;background:#111"></canvas><span class="spc-name">'+c.name+'</span><span class="spc-desc">'+c.desc+'</span>';
         card.onclick=function(){
             camState[sceneNum]=i;
             applyCam(sceneNum);
             closeScenePicker();
         };
         cards.appendChild(card);
+        renderCamPreview(sceneNum,i,pvId);
     });
 
     picker.classList.add('on');
@@ -495,9 +587,32 @@ function showScenePicker(sceneNum){
     spTimer=setTimeout(function(){closeScenePicker()},3000);
 }
 
+function renderCamPreview(sceneNum,camIdx,pvId){
+    var pvCanvas=document.getElementById(pvId);
+    if(!pvCanvas)return;
+    var pctx=pvCanvas.getContext('2d');
+    var cam=CAMS[sceneNum][camIdx];
+    pctx.save();
+    pctx.fillStyle='#111';pctx.fillRect(0,0,160,100);
+    pctx.translate(80,50);
+    pctx.scale(cam.zoom*0.17,cam.zoom*0.17);
+    pctx.translate(-80+cam.camX*0.5,-50+cam.camY*0.5);
+    if(SC[sceneNum])SC[sceneNum](pctx,160,100,3);
+    pctx.restore();
+    pctx.fillStyle='rgba(0,0,0,0.5)';
+    pctx.fillRect(0,82,160,18);
+    pctx.fillStyle=cam.camX===0&&cam.camY===0?'#ffd700':'#aaa';
+    pctx.font='bold 10px sans-serif';
+    pctx.textAlign='center';
+    var label=cam.zoom>1.3?'КРУПНЫЙ ПЛАН':cam.zoom<0.9?'ШИРОКИЙ':'СТАНДАРТ';
+    pctx.fillText(label,80,95);
+    pctx.textAlign='left';
+}
+
 function closeScenePicker(){
     clearTimeout(spTimer);
     spActive=false;
+    D.dirOverride=false;
     document.getElementById('scenePicker').classList.remove('on');
 }
 
@@ -511,6 +626,9 @@ function applyCam(sceneNum){
     D.camX=cam.camX;
     D.camY=cam.camY;
     D.zoom=cam.zoom;
+    camLerp.camX=cam.camX;
+    camLerp.camY=cam.camY;
+    camLerp.zoom=cam.zoom;
 }
 
 function getSceneNum(){
@@ -788,7 +906,7 @@ SC[1]=function(ctx,W,H,t){
 
     // Chef
     var wave=(t%4<2)?'wave':'idle';
-    drawChef(ctx,100+D.camX,H-115+D.camY,0.85,wave,'cheerful',t);
+    drawChef(ctx,100,H-115,0.85,wave,'cheerful',t);
 };
 
 SC[2]=function(ctx,W,H,t){
@@ -1029,7 +1147,7 @@ SC[5]=function(ctx,W,H,t){
     drawSteam(ctx,397,H-85,5,t,1.5);
 
     // Chef
-    drawChef(ctx,280+D.camX,H-125+D.camY,0.65,'cut','cheerful',t);
+    drawChef(ctx,280,H-125,0.65,'cut','cheerful',t);
 };
 
 SC[6]=function(ctx,W,H,t){
@@ -1075,7 +1193,7 @@ SC[6]=function(ctx,W,H,t){
     if(Math.random()<0.15*D.animSpd)fd.add(350+Math.random()*100,H-85,Math.random()*0.5-0.25,-(0.3+Math.random()),2,'rgba(255,255,255,0.35)',1);
     fd.update(0.16);fd.draw(ctx);
 
-    drawChef(ctx,470+D.camX,H-125+D.camY,0.65,'knead','cheerful',t);
+    drawChef(ctx,470,H-125,0.65,'knead','cheerful',t);
 };
 
 SC[7]=function(ctx,W,H,t){
@@ -1134,7 +1252,7 @@ SC[7]=function(ctx,W,H,t){
     }
 
     // Chef watching
-    drawChef(ctx,130+D.camX,H-55+D.camY,0.6,'idle','cheerful',t);
+    drawChef(ctx,130,H-55,0.6,'idle','cheerful',t);
 };
 
 SC[8]=function(ctx,W,H,t){
@@ -1192,7 +1310,7 @@ SC[8]=function(ctx,W,H,t){
         }
     }
 
-    drawChef(ctx,780+D.camX,H-110+D.camY,0.7,'wave','cheerful',t);
+    drawChef(ctx,780,H-110,0.7,'wave','cheerful',t);
 };
 
 /* ===== INTRO CHEF ===== */
@@ -1254,13 +1372,38 @@ function tick(){
                 info.x.clearRect(0,0,info.c.width,info.c.height);
                 var localT=(T-sc.t0)/(sc.t1-sc.t0);
                 var sceneNum=parseInt(sc.id.split('s')[1]);
-                var cam=CAMS[sceneNum]&&CAMS[sceneNum][camState[sceneNum]];
-                var zoom=cam?cam.zoom:1;
+                var target;
+                if(!D.dirOverride){
+                    if(viewMode==='auto'){
+                        var keys=CAM_KEYS[sceneNum];
+                        if(keys&&keys.length>0){
+                            var ki=0;
+                            for(var k=0;k<keys.length-1;k++){
+                                if(localT>=keys[k].t&&localT<keys[k+1].t){ki=k;break;}
+                                if(k===keys.length-2)ki=k;
+                            }
+                            var k0=keys[ki],k1=keys[Math.min(ki+1,keys.length-1)];
+                            var segT=(k1.t===k0.t)?0:clamp((localT-k0.t)/(k1.t-k0.t),0,1);
+                            segT=segT*segT*(3-2*segT);
+                            target={camX:lerpVal(k0.camX,k1.camX,segT),camY:lerpVal(k0.camY,k1.camY,segT),zoom:lerpVal(k0.zoom,k1.zoom,segT)};
+                        }
+                    }else{
+                        var cam=CAMS[sceneNum]&&CAMS[sceneNum][camState[sceneNum]];
+                        target={camX:cam?cam.camX:0,camY:cam?cam.camY:0,zoom:cam?cam.zoom:1};
+                    }
+                }
+                if(target){
+                    camLerp.camX=lerpVal(camLerp.camX,target.camX,LERP_SPEED);
+                    camLerp.camY=lerpVal(camLerp.camY,target.camY,LERP_SPEED);
+                    camLerp.zoom=lerpVal(camLerp.zoom,target.zoom,LERP_SPEED);
+                }
+                D.camX=camLerp.camX;
+                D.camY=camLerp.camY;
                 info.x.save();
                 info.x.translate(info.c.width/2,info.c.height/2);
-                info.x.scale(zoom,zoom);
-                info.x.translate(-info.c.width/2,-info.c.height/2);
-                SC[sc.id.split('s')[1]](info.x,info.c.width,info.c.height,localT*12*animT);
+                info.x.scale(camLerp.zoom,camLerp.zoom);
+                info.x.translate(-info.c.width/2+camLerp.camX,-info.c.height/2+camLerp.camY);
+                SC[sceneNum](info.x,info.c.width,info.c.height,localT*12*animT);
                 info.x.restore();
                 drawSubtitles(info.x,info.c.width,info.c.height,localT*12*animT);
                 drawFade(info.x,info.c.width,info.c.height);
@@ -1298,6 +1441,7 @@ document.onkeydown=function(e){
 var viewMode='auto';
 function selectView(mode){
     viewMode=mode;
+    D.dirOverride=false;
     document.querySelectorAll('.vm-card').forEach(function(el){el.classList.toggle('active',el.dataset.mode===mode)});
     if(mode!=='auto'){
         var presets={closeup:1,wide:2,drama:1};
@@ -1340,7 +1484,11 @@ function replayWith(preset){
     for(var i=1;i<=8;i++){
         if(p[i]!==undefined)camState[i]=p[i];
     }
-    D.mood=p.mood;D.light=p.light;
+    camState.currentScene=0;
+    D.mood=p.mood;D.light=p.light;D.dirOverride=false;
+    viewMode='closeup';
+    camLerp={camX:0,camY:0,zoom:1};
+    document.querySelectorAll('.vm-card').forEach(function(el){el.classList.remove('active')});
     var m=document.getElementById('mood');if(m)m.value=p.mood;
     var l=document.getElementById('light');if(l)l.value=p.light;
     T=0;
